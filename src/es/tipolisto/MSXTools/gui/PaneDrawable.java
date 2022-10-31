@@ -4,12 +4,10 @@ package es.tipolisto.MSXTools.gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -26,6 +24,7 @@ import es.tipolisto.MSXTools.beans.RGB;
 import es.tipolisto.MSXTools.utils.MSXPalette;
 import es.tipolisto.MSXTools.utils.NumberManager;
 import es.tipolisto.MSXTools.utils.Palettes;
+import utils.ImageManager;
 
 
 
@@ -34,8 +33,6 @@ import es.tipolisto.MSXTools.utils.Palettes;
 public class PaneDrawable extends JPanel implements MouseListener, MouseMotionListener{
 	private int borderX;
 	private int borderY;
-	//private int borderTop;
-	//private int borderDown;
 	private int maxWidth;
 	private int maxHeight; 
 	private int sizeTile;
@@ -48,6 +45,8 @@ public class PaneDrawable extends JPanel implements MouseListener, MouseMotionLi
 	//variables necesarias para detectar el color de una fila
 	private JButton[] jButtons0;
 	private JButton[] jButtons1;
+	//private Color[] colorsButtons0;
+	//private Color[] colorsButtons1;
 	private JTextArea textAreaColor;
 	private JTextArea textAreaDefinition;
 	private Pixel[][] pixels;
@@ -60,7 +59,7 @@ public class PaneDrawable extends JPanel implements MouseListener, MouseMotionLi
 	private byte paintBotX;
 	private byte paintBotY;
 	
-	public PaneDrawable(int horizontalTiles, int verticalTiles) {
+	public PaneDrawable(int horizontalTiles, int verticalTiles, JButton[] jButtons0,JButton[] jButtons1) {
 		borderX=120;
 		borderY=120;
 		sizeTile=20;
@@ -72,8 +71,10 @@ public class PaneDrawable extends JPanel implements MouseListener, MouseMotionLi
 		pixelOldY=0;
 		this.horizontalTiles=horizontalTiles;
 		this.verticalTiles=verticalTiles;
-		jButtons0=new JButton[16];
-		jButtons1=new JButton[16];
+		this.jButtons0=jButtons0;
+		this.jButtons1=jButtons1;
+		//colorsButtons0=new Color[16];
+		//colorsButtons1=new Color[16];
 		//El canvas tendrá un array de pixeles independiente
 		pixels=new Pixel[16][16];
 		deleteColor=new Color(239,252,254);
@@ -149,10 +150,6 @@ public class PaneDrawable extends JPanel implements MouseListener, MouseMotionLi
 	
 	//Al pulsar enter pintaremos un cuadrado de un color
 	public void paintPixelAtPoint(int x, int y, byte colorBackOrFront){
-		//La x en el evento on click la recolocamos así:
-		//x=((point.x-borderX)/sizeTile)*sizeTile
-		//y=((point.y-borderY)/sizeTile)*sizeTile;
-		//System.out.println("paintPixel dice, recibido: x : "+x+", y: "+y);
 		Graphics g=this.getGraphics();
 		//Para obtener el botón 
 		int row=(y-borderY)/sizeTile;
@@ -175,9 +172,6 @@ public class PaneDrawable extends JPanel implements MouseListener, MouseMotionLi
 		pixels[positionOnArrayColumn][positionOnArrayFile].setPositionY(y);
 		pixels[positionOnArrayColumn][positionOnArrayFile].setForOrBrackground(colorBackOrFront);
 		pixels[positionOnArrayColumn][positionOnArrayFile].setColor(colorJButton);
-
-		//System.out.println("paintPixel dice: almacenado pixel x: "+positionOnArrayColumn+", y:"+positionOnArrayFile);
-		//System.out.println("paintPixel dice: almacenado : "+colorBackOrFront);
 	}
 	
 	//Cuando pulsamos los cursores mostramos un recuadro indicando el lugar donde vamos a 
@@ -290,6 +284,23 @@ public class PaneDrawable extends JPanel implements MouseListener, MouseMotionLi
 	public void setSelectedClear(boolean selectedClear) {
 		this.selectedClear = selectedClear;
 	}
+	/*
+	public Color[] getColorsButtons0() {
+		return colorsButtons0;
+	}
+	public void setColorsButtons0(Color[] colorsButtons0) {
+		this.colorsButtons0 = colorsButtons0;
+	}
+	public Color[] getColorsButtons1() {
+		return colorsButtons1;
+	}
+
+
+	public void setColorsButtons1(Color[] colorsButtons1) {
+		this.colorsButtons1 = colorsButtons1;
+	}*/
+
+
 	public JTextArea getTextAreaColor() {
 		return textAreaColor;
 	}
@@ -470,7 +481,7 @@ public class PaneDrawable extends JPanel implements MouseListener, MouseMotionLi
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];
 				Color color=pixel.getColor();
-				int positionColorOnPalette=getPositionColorOnPalette(color);
+				int positionColorOnPalette=ImageManager.getPositionColorOnPalette(color);
 				String stringPositionColorOnPalette=NumberManager.decimalAHexadecimal(positionColorOnPalette);
 				char[] charArray=stringPositionColorOnPalette.toCharArray();
 				char charPositionColorOnPalette=' ';
@@ -565,17 +576,6 @@ public class PaneDrawable extends JPanel implements MouseListener, MouseMotionLi
 
 	
 	
-	private int getPositionColorOnPalette(Color color) {
-		HashMap<MSXPalette, RGB> palettePhilips8255NMS=Palettes.getPalettePhilips8255NMSForSprites();
-		int number=0;
-		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
-			RGB rgbItem=entry.getValue();
-			if(rgbItem.getRed()==color.getRed() && rgbItem.getBlue()==color.getBlue() && rgbItem.getGreen()==color.getGreen()) {
-				number=entry.getKey().ordinal();
-			}
-		}
-		return number;
-	}
 
 
 

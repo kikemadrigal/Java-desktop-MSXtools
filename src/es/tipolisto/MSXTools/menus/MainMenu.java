@@ -43,8 +43,9 @@ public class MainMenu extends JMenuBar{
 	private JPopupMenu jPopupMenuSprite;
 	private JScrollPane jscrollPanelImageSprites;
 	private Dimension dimensionJScrollPaneSprites;
+	private JButton[] jButtons0,jButtons1;
 	//int countSprites;
-	public MainMenu(PaneDrawable contentPane,JPanel panelImagesSprites,JPopupMenu jPopupMenuSprite,JScrollPane jscrollPanelImageSprites,Dimension dimensionJScrollPaneSprites,ArrayList<Sprite> arrayListSprites,JTextArea textAreaDefinition, JTextArea textAreaColors) {
+	public MainMenu(PaneDrawable contentPane,JPanel panelImagesSprites,JPopupMenu jPopupMenuSprite,JScrollPane jscrollPanelImageSprites,Dimension dimensionJScrollPaneSprites,ArrayList<Sprite> arrayListSprites,JTextArea textAreaDefinition, JTextArea textAreaColors, JButton[] jButtons0, JButton[] jButtons1) {
 		this.contentPane=contentPane;
 		this.panelImagesSprites=panelImagesSprites;
 		this.jPopupMenuSprite=jPopupMenuSprite;
@@ -53,6 +54,8 @@ public class MainMenu extends JMenuBar{
 		this.arrayListSprites=arrayListSprites;
 		this.textAreaDefinition=textAreaDefinition;
 		this.textAreaColors=textAreaColors;
+		this.jButtons0=jButtons0;
+		this.jButtons1=jButtons1;
 		//this.countSprites=0;
 		
 		/****************Menu File********************************/
@@ -63,10 +66,14 @@ public class MainMenu extends JMenuBar{
 	    mnNewMenuFile.add(mntmNewMenuItemOpenSprites);
 	    mntmNewMenuItemOpenSprites.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				openFile();
+				if(arrayListSprites.size()>0) {
+					JOptionPane.showMessageDialog(null, "Close open sprites");
+				}else {
+					openFile();
+				}
 			}
 		});
-	    JMenuItem mntmNewMenuItemNewSprites = new JMenuItem("New");
+	    JMenuItem mntmNewMenuItemNewSprites = new JMenuItem("New / Close");
 	    mnNewMenuFile.add(mntmNewMenuItemNewSprites);
 	    mntmNewMenuItemNewSprites.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -84,7 +91,23 @@ public class MainMenu extends JMenuBar{
 	    mnNewMenuFile.add(mntmNewMenuItemSaveSprites);
 	    mntmNewMenuItemSaveSprites.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				saveFile();
+				if(arrayListSprites.size()==0) {
+					JOptionPane.showMessageDialog(null, "There are no sprites");		
+				}else {
+					String fileName=JOptionPane.showInputDialog(null, "Enter file name");
+					fileName=fileName+".spr";
+					File file=new File(fileName);
+					if(file.exists()) {
+						int input = JOptionPane.showConfirmDialog(null, "The file exists, do you want to overwrite it?");
+						// 0=yes, 1=no, 2=cancel
+						if(input==0) {
+							saveFile(file);
+						}	
+					}else {
+						saveFile(file);
+					}	
+				}
+				
 			}
 		});
 	    
@@ -217,11 +240,11 @@ public class MainMenu extends JMenuBar{
 	
 	
 	
-	public void showSpriteOnRiboon(Sprite sprite) {
-		//System.out.println("Pintando el " + sprite.getNumber());
-
+	public void updateRiboon(Sprite sprite) {
+		//Vamos a mostrar este sprite en el riboon
+		//1.Obtenemos los pixeles
 		Pixel[][] pixels = sprite.getPixels();
-		// y apartir de estos reamos la imagen en la riboon
+		//Necesitamos crear un befferedImage para poder trabajar con pixeles
 		BufferedImage bufferedImageDestiny = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
 		int colorSRGB = 0;
 		for (int y = 0; y < pixels.length; y++) {
@@ -239,14 +262,14 @@ public class MainMenu extends JMenuBar{
 		BufferedImage bufferedImageScaled = ImageManager.imageToBufferedImage(img);
 		// Obtenemos su Jlabel, le ponemos la imagen y le aplicamos los comportamientos
 		JButton btnImageSprites = new JButton("");
+		//Ubicamos la imagen en la posición que queramos
 		btnImageSprites.setBounds(10 + (sprite.getNumber() * 120), 10, 16 * 7, 16 * 7);
 		dimensionJScrollPaneSprites.setSize(panelImagesSprites.getWidth() + (sprite.getNumber() * 100),
 				panelImagesSprites.getHeight());
 		panelImagesSprites.add(btnImageSprites);
 		// lblLabelImageSprites = sprite.getjLabel();
 		btnImageSprites.setIcon(new ImageIcon(bufferedImageScaled));
-		// Creamos el comportamiento al hacer doble click se mostará en el canvas del
-		// drawPane
+		// Creamos en la imagen los comportamientos
 		btnImageSprites.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -266,15 +289,25 @@ public class MainMenu extends JMenuBar{
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 2) {
-					captureSprite(sprite.getNumber());
+				if(e.getButton()==MouseEvent.BUTTON1) {
+					if (e.getClickCount() == 2) {
+						showSpriteOnContentPane(sprite);
+					}
+				}else if(e.getButton()==MouseEvent.BUTTON3) {
+					int input = JOptionPane.showConfirmDialog(null, "Delete item?");
+			        // 0=yes, 1=no, 2=cancel
+					if(input==0) {
+						panelImagesSprites.remove(btnImageSprites);
+						panelImagesSprites.repaint();
+						arrayListSprites.remove(sprite.getNumber());
+					}
 				}
+				
 			}
 		});
 
-		/*
-		JMenuItem itemJPopMenu = new JMenuItem("Delete " + sprite.getNumber());
-		jPopupMenuSprite.add(itemJPopMenu);
+		
+		/*JMenuItem itemJPopMenu = new JMenuItem("Delete " + sprite.getNumber());
 		itemJPopMenu.addActionListener(new ActionListener() {
 
 			@Override
@@ -284,7 +317,7 @@ public class MainMenu extends JMenuBar{
 			}
 		});
 		jPopupMenuSprite.show(btnImageSprites, sprite.getNumber()*120, btnImageSprites.getY());
-		*/
+		jPopupMenuSprite.add(itemJPopMenu);*/
 		
 
 	}
@@ -311,7 +344,7 @@ public class MainMenu extends JMenuBar{
 					//System.out.println(sprite.toString());
 					//sprite.setPixels(contentPane.getPixels());
 					arrayListSprites.add(sprite);
-					showSpriteOnRiboon(sprite);
+					updateRiboon(sprite);
 					//countSprites++;
 					
 
@@ -331,25 +364,13 @@ public class MainMenu extends JMenuBar{
 	/**
 	 * Crea un archivo donde se guardan los sprites
 	 */
-	private void saveFile() {
-		String fileName=JOptionPane.showInputDialog(null, "Enter file name");
-		fileName=fileName+".spr";
+	private void saveFile(File file) {
 		try {
-
-			ObjectOutputStream objectOutputStream=new ObjectOutputStream(new FileOutputStream(fileName));
+			ObjectOutputStream objectOutputStream=new ObjectOutputStream(new FileOutputStream(file));
 			Sprite[] sprites=new Sprite[arrayListSprites.size()];
 			for (int i=0;i<arrayListSprites.size();i++) {
 				Sprite sprite=arrayListSprites.get(i);
 				sprites[i]=sprite;
-				/*Pixel[][] pixels=sprite.getPixels();
-				for(int y=0;y<pixels.length;y++) {
-					for(int x=0;x<pixels[0].length;x++) {
-						Pixel pixel=pixels[x][y];
-						Color color=pixel.getColor();
-						System.out.print("|"+color.getRed()+","+color.getGreen()+","+color.getBlue());
-					}
-				}
-				System.out.println("");*/
 			}
 			objectOutputStream.writeObject(sprites);
 			objectOutputStream.close();
@@ -360,21 +381,57 @@ public class MainMenu extends JMenuBar{
 	}
 	
 	
-	private void captureSprite(int number) {
-		//int positionOnArrayColumn=(pointX-borderX)/sizeTile;
-		//int positionOnArrayFile=(pointY-borderY)/sizeTile;
-		//contentPane.setPixels(pixels);
-		System.out.println("Recibido en capture el "+number);
-		Sprite sprite=arrayListSprites.get(number);
-		Pixel[][] pixels=sprite.getPixels();
-		for(int y=0;y<pixels.length;y++) {
-			for(int x=0;x<pixels[0].length;x++) {
-				//contentPane.paintPixelAtPoint(pixels[x][y].getPositionX(), pixels[x][y].getPositionY(), (byte)0);
-				contentPane.paintPixelAtPoint(pixels[x][y].getPositionX(), pixels[x][y].getPositionY(), (byte)0);
-				//paintPixelAtPoint(pixels[positionOnArrayColumn][positionOnArrayFile].getPositionX(), pixels[positionOnArrayColumn][positionOnArrayFile].getPositionY(), (byte)0);
-				
+	private void showSpriteOnContentPane(Sprite sprite) {
+		//1.Obtenemos el color de los botones y se los asignamos al contentPane
+		Color[] colorButtons0Sprite=sprite.getColorButtons0();
+		Color[] colorButtons1Sprite=sprite.getColorButtons1();
+		for (int i=0;i<jButtons0.length;i++) {
+			//Obtenemos el botón
+			JButton button0Frame=jButtons0[i];
+			JButton button1Frame=jButtons1[i];
+			//Obtenemos el color guardado en el sprite
+			Color color0Frame=colorButtons0Sprite[i];
+			Color color1Sprite=colorButtons1Sprite[i];
+			//Se lo ponemos al bpotón del fram
+			button0Frame.setBackground(color0Frame);
+			button1Frame.setBackground(color1Sprite);
+		}
+
+		//2.Obtenemos los pixeles para dibujarlos en el canvas
+		Pixel[][] pixelsSprite=sprite.getPixels();
+		for(int y=0;y<pixelsSprite.length;y++) {
+			for(int x=0;x<pixelsSprite[0].length;x++) {
+				Pixel pixelSprite=pixelsSprite[x][y];
+				contentPane.paintPixelAtPoint(pixelSprite.getPositionX(), pixelSprite.getPositionY(), pixelSprite.getForOrBrackground());
 			}
 		}
+		
+		//3.Obtenemos los textsAreas
+		String dataDefinition=sprite.getDataDefinition();
+		textAreaDefinition.setText(dataDefinition);
+		String dataColors=sprite.getDataColors();
+		textAreaDefinition.setText(dataDefinition);
+		textAreaColors.setText(dataColors);		
+	}
+
+
+
+
+
+
+	public void moveSpriteLeftOnRiboon(Sprite spriteSelected) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
+
+
+	public void moveSpriteRightOnRiboon(Sprite spriteSelected) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

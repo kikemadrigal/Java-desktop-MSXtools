@@ -14,6 +14,8 @@ public class Sprite implements Serializable {
 	private Pixel[][] pixels;
 	private String dataDefinition;
 	private String dataColors;
+	private Color[] colorButtons0;
+	private Color[] colorButtons1;
 	
 	private BufferedImage bufferedImage;
 	public Sprite(int number, int x, int y, String name) {
@@ -30,6 +32,8 @@ public class Sprite implements Serializable {
 				pixels[x][y]=pixel;
 			}
 		}
+		this.colorButtons0=new Color[16];
+		this.colorButtons1=new Color[16];
 	}
 	public int getNumber() {
 		return number;
@@ -80,6 +84,18 @@ public class Sprite implements Serializable {
 	}
 	public void setDataColors(String dataColors) {
 		this.dataColors = dataColors;
+	}	
+	public Color[] getColorButtons0() {
+		return colorButtons0;
+	}
+	public void setColorButtons0(Color[] colorButtons0) {
+		this.colorButtons0 = colorButtons0;
+	}
+	public Color[] getColorButtons1() {
+		return colorButtons1;
+	}
+	public void setColorButtons1(Color[] colorButtons1) {
+		this.colorButtons1 = colorButtons1;
 	}
 	@Override
 	public String toString() {

@@ -51,6 +51,7 @@ import javax.swing.JTextArea;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JScrollPane;
+import javax.swing.Icon;
 
 public class SpriteEditorWindow extends JFrame  {
 
@@ -79,17 +80,21 @@ public class SpriteEditorWindow extends JFrame  {
 	private JScrollPane jscrollPanelImageSprites;
 	private Dimension dimensionJScrollPaneSprites;
 	private MainMenu menuBar;
+	private Sprite spriteSelected;
 	
 	public SpriteEditorWindow() {
 		setTitle("Sprite editor");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 896, 715);
-		contentPane = new PaneDrawable(16, 16);
-		contentPane.setLayout(null);
 		setResizable(false);
-		//Centramos la ventana en la pantalla
 		setLocationRelativeTo(null);
-		
+		colorFondo=new Color(239,252,254);
+	    setBackground(colorFondo);
+		contentPane = new PaneDrawable(16, 16, jButtons0,jButtons1);
+		contentPane.setLayout(null);
+		setContentPane(contentPane);
+	    
+	    
 		selectedColor=10;
 		foreOrBackGround=0;
 		fileColor=0;
@@ -130,9 +135,7 @@ public class SpriteEditorWindow extends JFrame  {
 	    
 	    
 	    
-	    setContentPane(contentPane);
-	    colorFondo=new Color(239,252,254);
-	    setBackground(colorFondo);
+
 	   
 
 	    
@@ -291,6 +294,7 @@ public class SpriteEditorWindow extends JFrame  {
 		
 		//les ponemos los colores a los botones de la i<quierda
 		//setAllColorButtons();
+		
 		contentPane.setjButtons0(jButtons0);
 		contentPane.setjButtons1(jButtons1);
 		
@@ -308,7 +312,10 @@ public class SpriteEditorWindow extends JFrame  {
 		contentPane.add(jscrollPanelImageSprites);
 		
 
-
+		menuBar = new MainMenu(contentPane, panelImagesSprites, jPopupMenuSprite,
+				jscrollPanelImageSprites,dimensionJScrollPaneSprites, arrayListSprites,
+				textAreaDefinition, textAreaColor, jButtons0, jButtons1);
+		setJMenuBar(menuBar);
 		
 		
 		JButton btnSpriteAdd = new JButton(new ImageIcon("data\\agregar.png"));
@@ -323,35 +330,49 @@ public class SpriteEditorWindow extends JFrame  {
 		JButton btnSpriteUpdate = new JButton(new ImageIcon("data\\actualizar.png"));
 		btnSpriteUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Tamaño: "+arrayListSprites.size());
-				for (int i=0;i<arrayListSprites.size();i++) {
-					Sprite sprite=arrayListSprites.get(i);
-					System.out.println("Sprite "+sprite.getNumber());
-					Pixel[][] pixels=sprite.getPixels();
-					for(int y=0;y<pixels.length;y++) {
-						for(int x=0;x<pixels[0].length;x++) {
-							Pixel pixel=pixels[x][y];
-							Color color=pixel.getColor();
-							System.out.print("|"+color.getRed()+","+color.getGreen()+","+color.getBlue());
-						}
-					}
-					System.out.println("");
-					
+
+				Sprite sprite0=arrayListSprites.get(0);
+				Color[] colorsSprite0=sprite0.getColorButtons0();
+				for(int i=0;i<colorsSprite0.length;i++) {
+					Color color=colorsSprite0[i];
+					//System.out.print("|"+color.getRed()+","+color.getGreen()+","+color.getBlue());
+					//Color color=new Color(109,255,109);
+					String nameColor=ImageManager.getNameColor(color);
+					System.out.print(i+"-"+nameColor);
 				}
 				
 			}
 		});
 		btnSpriteUpdate.setBounds(185, 451, 40, 40);
 		contentPane.add(btnSpriteUpdate);
+		btnSpriteUpdate.setEnabled(false);
+		
+		
+		JButton btnSpriteLeft = new JButton(new ImageIcon("data\\left.png"));
+		btnSpriteLeft.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				menuBar.moveSpriteLeftOnRiboon(spriteSelected);
+			}
+		});
+		btnSpriteLeft.setEnabled(false);
+		btnSpriteLeft.setBounds(247, 451, 40, 40);
+		contentPane.add(btnSpriteLeft);
+		
+		JButton btnSpriteRight = new JButton(new ImageIcon("data\\right.png"));
+		btnSpriteRight.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				menuBar.moveSpriteRightOnRiboon(spriteSelected);
+			}
+		});
+		btnSpriteRight.setEnabled(false);
+		btnSpriteRight.setBounds(316, 451, 40, 40);
+		contentPane.add(btnSpriteRight);
+		
+		
+		
 		
 
 
-		
-
-		
-		//MainMenu(JPanel panelImagesSprites,JPopupMenu jPopupMenuSprite,JScrollPane jscrollPanelImageSprites,Dimension dimensionJScrollPaneSprites,ArrayList<Sprite> arrayListSprites,JTextArea textAreaDefinition, JTextArea textAreaColors)
-	    menuBar = new MainMenu(contentPane,panelImagesSprites,jPopupMenuSprite,jscrollPanelImageSprites,dimensionJScrollPaneSprites,arrayListSprites,textAreaDefinition,textAreaColor);
-	    setJMenuBar(menuBar);
 
 
 		//Ponemos que el color de frente amarillo
@@ -365,33 +386,44 @@ public class SpriteEditorWindow extends JFrame  {
 	
 	
 	private void createSprite() {
+		//1.Creamos el sprite
 		// Sprite(int number, int x, int y, String name)
-		Sprite sprite = new Sprite(arrayListSprites.size(), 0, 0, "No_name" + arrayListSprites.size());
-		sprite.setPixels(contentPane.getPixels());
+		Sprite sprite = new Sprite(arrayListSprites.size(), 0, 0, "No_name" + arrayListSprites.size());	
+		//2Le metemos los textAreas
 		sprite.setDataDefinition(textAreaDefinition.getText());
 		sprite.setDataColors(textAreaColor.getText());
-		menuBar.showSpriteOnRiboon(sprite);
-		arrayListSprites.add(sprite);
-		System.out.println("Guardado el sprite "+sprite.getName()+"-"+sprite.getNumber());
-		//Necesitamos meterle al contentPane otro array
-		Pixel[][] pixels=new Pixel[16][16];
+		
+		//3 Le metemos los que haya en los botones del contentPane en ese momento
+		JButton[] buttons0ContentPane=contentPane.getjButtons0();
+		JButton[] buttons1ContentPane=contentPane.getjButtons1();
+		Color[] colorsButtons0Sprite=new Color[16];
+		Color[] colorsButtons1Sprite=new Color[16];
+		for(int i=0;i<16;i++) {
+			colorsButtons0Sprite[i]=buttons0ContentPane[i].getBackground();
+			colorsButtons1Sprite[i]=buttons1ContentPane[i].getBackground();
+			sprite.setColorButtons0(colorsButtons0Sprite);
+			sprite.setColorButtons1(colorsButtons1Sprite);
+		}
+
+		//4.Vamos a meterle los pixeles que hay en el contentPane dibujados 
+		Pixel[][] pixelsContentPane=contentPane.getPixels();
+		//Para eso crearemos una nueva definición de pixeles que tendrá el sprite
+		Pixel[][] pixelsSprite=new Pixel[16][16];
 		Color deleteColor=new Color(239,252,254);
-		for(int y=0;y<pixels.length;y++) {
-			for(int x=0;x<pixels[0].length;x++) {
-				Pixel pixel=new Pixel((x*contentPane.getSizeTile())+contentPane.getBorderX(),(y*contentPane.getSizeTile())+contentPane.getBorderY(),(byte)2,deleteColor);
-				pixels[x][y]=pixel;
+		for(int y=0;y<pixelsSprite.length;y++) {
+			for(int x=0;x<pixelsSprite[0].length;x++) {
+				Pixel pixelContentPane=pixelsContentPane[x][y];
+				//Pixel pixel=new Pixel((x*contentPane.getSizeTile())+contentPane.getBorderX(),(y*contentPane.getSizeTile())+contentPane.getBorderY(),(byte)2,deleteColor);
+				Pixel pixelSprite=new Pixel(pixelContentPane.getPositionX(),pixelContentPane.getPositionY(),pixelContentPane.getForOrBrackground(),pixelContentPane.getColor());	
+				pixelsSprite[x][y]=pixelSprite;
 			}
 		}
-		contentPane.setPixels(pixels);
-		/*Pixel[][] pixels=sprite.getPixels();
-		for(int y=0;y<pixels.length;y++) {
-			for(int x=0;x<pixels[0].length;x++) {
-				Pixel pixel=pixels[x][y];
-				Color color=pixel.getColor();
-				System.out.print("|"+color.getRed()+","+color.getGreen()+","+color.getBlue());
-			}
-		}
-		System.out.println("");*/
+		sprite.setPixels(pixelsSprite);
+		//5.Lo añadimos a la lista el JFrame
+		arrayListSprites.add(sprite);
+		//6.Actualizamos el rrboon para verlo
+		menuBar.updateRiboon(sprite);
+
 	}
 	
 	
@@ -517,84 +549,4 @@ public class SpriteEditorWindow extends JFrame  {
 			}
 		}
 	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/*private void showSpriteOnRiboon(Sprite sprite) {
-		
-		System.out.println("Pintando el " + sprite.getNumber());
-		Pixel[][] pixels = sprite.getPixels();
-		// y apartir de estos reamos la imagen en la riboon
-		BufferedImage bufferedImageDestiny = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
-		int colorSRGB = 0;
-		for (int y = 0; y < pixels.length; y++) {
-			for (int x = 0; x < pixels[0].length; x++) {
-				Pixel pixel = pixels[x][y];
-				Color color = pixel.getColor();
-				// System.out.print("["+color.getRed()+","+color.getGreen()+","+color.getBlue()+"]");
-				colorSRGB = (int) color.getRed() << 16 | color.getGreen() << 8 | color.getBlue();
-				bufferedImageDestiny.setRGB(x, y, colorSRGB);
-			}
-			// System.out.println("");
-		}
-		// La transformamos para que no seva de 16x16pixeles
-		Image img = bufferedImageDestiny.getScaledInstance(100, 100, Image.SCALE_DEFAULT);
-		BufferedImage bufferedImageScaled = ImageManager.imageToBufferedImage(img);
-		// Obtenemos su Jlabel, le ponemos la imagen y le aplicamos los comportamientos
-		JButton btnImageSprites = new JButton("");
-		btnImageSprites.setBounds(10 + (sprite.getNumber() * 120), 10, 16 * 7, 16 * 7);
-		dimensionJScrollPaneSprites.setSize(panelImagesSprites.getWidth() + (sprite.getNumber() * 100),
-				panelImagesSprites.getHeight());
-		panelImagesSprites.add(btnImageSprites);
-		// lblLabelImageSprites = sprite.getjLabel();
-		btnImageSprites.setIcon(new ImageIcon(bufferedImageScaled));
-		// Creamos el comportamiento al hacer doble click se mostará en el canvas del
-		// drawPane
-		btnImageSprites.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 2) {
-					contentPane.fillPixellOnCanvas(pixels);
-				}
-			}
-		});
-
-		JMenuItem itemJPopMenu = new JMenuItem("Delete " + sprite.getNumber());
-		jPopupMenuSprite.add(itemJPopMenu);
-		itemJPopMenu.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// arrayListSprites.remove(sprite.getNumber());
-				System.out.println("click");
-			}
-		});
-		jPopupMenuSprite.show(btnImageSprites, sprite.getNumber()*120, btnImageSprites.getY());
-	}*/
 }
