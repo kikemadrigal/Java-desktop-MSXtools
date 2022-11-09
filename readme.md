@@ -18,7 +18,7 @@ La aplicación puede ser gestiona a través de la línea de comandos
 
 Si no escribes nada o si haces doble click en el ejectuable se abrirá el menú principal:
 
-<img src="data/readme/menu.PNG" width="300px">
+<img src="data/readme/menu.PNG" width="500px">
 
 
 # Sprite editor
