@@ -41,7 +41,7 @@ public class MainWindow extends JFrame {
 	 */
 	public MainWindow() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 462, 533);
+		setBounds(100, 100, 817, 407);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -50,10 +50,10 @@ public class MainWindow extends JFrame {
 		//Centramos la ventana en la pantalla
 		setLocationRelativeTo(null);
 		
-		JLabel lblNewLabel = new JLabel("Tools MSX");
+		JLabel lblNewLabel = new JLabel("MSXTools");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setBounds(164, 11, 120, 21);
-		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		lblNewLabel.setBounds(316, 23, 166, 38);
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 17));
 		contentPane.add(lblNewLabel);
 		
 		JButton jButtonDeleteComents = new JButton("Delete coments");
@@ -63,11 +63,11 @@ public class MainWindow extends JFrame {
 				frame.setVisible(true);
 			}
 		});
-		jButtonDeleteComents.setBounds(118, 57, 232, 23);
+		jButtonDeleteComents.setBounds(559, 112, 232, 23);
 		contentPane.add(jButtonDeleteComents);
 		
 		JButton jButonCSVToBas = new JButton("CSV / TMX to Bas");
-		jButonCSVToBas.setBounds(118, 103, 232, 23);
+		jButonCSVToBas.setBounds(10, 112, 232, 23);
 		jButonCSVToBas.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				CSVTSXToBasWindow csvToBasWindow=new CSVTSXToBasWindow();
@@ -77,7 +77,7 @@ public class MainWindow extends JFrame {
 		contentPane.add(jButonCSVToBas);
 		
 		JButton btnNewButton = new JButton("Compress / decompress RLE 16");
-		btnNewButton.setBounds(118, 233, 232, 23);
+		btnNewButton.setBounds(559, 157, 232, 23);
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				CompressWindow frame = new CompressWindow();
@@ -93,11 +93,11 @@ public class MainWindow extends JFrame {
 				frame.setVisible(true);
 			}
 		});
-		jButtonCSVToHex.setBounds(118, 146, 232, 23);
+		jButtonCSVToHex.setBounds(10, 157, 232, 23);
 		contentPane.add(jButtonCSVToHex);
 		
 		JLabel lblNewLabel_1 = new JLabel("MSX Murcia 2022 ");
-		lblNewLabel_1.setBounds(305, 458, 131, 14);
+		lblNewLabel_1.setBounds(660, 332, 131, 14);
 		contentPane.add(lblNewLabel_1);
 		
 		JButton jButtonLetterCounter = new JButton("Letter counter");
@@ -107,7 +107,7 @@ public class MainWindow extends JFrame {
 				frame.setVisible(true);
 			}
 		});
-		jButtonLetterCounter.setBounds(118, 278, 232, 23);
+		jButtonLetterCounter.setBounds(559, 208, 232, 23);
 		contentPane.add(jButtonLetterCounter);
 		
 		JButton jButtonPixelMap = new JButton("Tile editor");
@@ -119,7 +119,7 @@ public class MainWindow extends JFrame {
 
 			}
 		});
-		jButtonPixelMap.setBounds(118, 326, 231, 23);
+		jButtonPixelMap.setBounds(282, 112, 231, 23);
 		contentPane.add(jButtonPixelMap);
 		
 		JButton buttonBmp2SC5 = new JButton("IMG 2 SC");
@@ -129,7 +129,7 @@ public class MainWindow extends JFrame {
 				frame.setVisible(true);
 			}
 		});
-		buttonBmp2SC5.setBounds(118, 415, 232, 21);
+		buttonBmp2SC5.setBounds(10, 260, 232, 21);
 		contentPane.add(buttonBmp2SC5);
 		
 		JButton buttonCSVTMXToASM = new JButton("CSV / TMX  to ASM");
@@ -139,7 +139,7 @@ public class MainWindow extends JFrame {
 				frame.setVisible(true);
 			}
 		});
-		buttonCSVTMXToASM.setBounds(116, 191, 234, 23);
+		buttonCSVTMXToASM.setBounds(10, 208, 234, 23);
 		contentPane.add(buttonCSVTMXToASM);
 		
 		JButton btnSpriteEditor = new JButton("Sprite editor");
@@ -149,7 +149,34 @@ public class MainWindow extends JFrame {
 				frame.setVisible(true);				
 			}
 		});
-		btnSpriteEditor.setBounds(119, 368, 231, 23);
+		btnSpriteEditor.setBounds(282, 157, 231, 23);
 		contentPane.add(btnSpriteEditor);
+		
+		JLabel lblNewLabel_2 = new JLabel("Converters");
+		lblNewLabel_2.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_2.setBounds(10, 72, 232, 29);
+		contentPane.add(lblNewLabel_2);
+		
+		JLabel lblNewLabel_2_1 = new JLabel("Editors");
+		lblNewLabel_2_1.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_2_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_2_1.setBounds(282, 72, 232, 29);
+		contentPane.add(lblNewLabel_2_1);
+		
+		JLabel lblNewLabel_2_2 = new JLabel("Utils");
+		lblNewLabel_2_2.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_2_2.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_2_2.setBounds(559, 72, 232, 29);
+		contentPane.add(lblNewLabel_2_2);
+		
+		JButton btnPaletteEditor = new JButton("Palette editor");
+		btnPaletteEditor.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null, "WIP");
+			}
+		});
+		btnPaletteEditor.setBounds(282, 208, 231, 23);
+		contentPane.add(btnPaletteEditor);
 	}
 }

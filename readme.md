@@ -10,3 +10,28 @@ https://github.com/kikemadrigal/Java-desktop-MSXtools/releases/tag/v1.0.1
 
 
 
+# Command line
+
+La aplicación puede ser gestiona a través de la línea de comandos
+
+<img src="data/readme/commandLine.PNG" width="500px">
+
+Si no escribes nada o si haces doble click en el ejectuable se abrirá el menú principal:
+
+<img src="data/readme/menu.PNG" width="300px">
+
+
+# Sprite editor
+
+Puedes:
+
+    1 Gestionar tus sprites
+    2 Exportarlos a un archivo basic
+    3 Exportarlos a un archivo binario
+    4 La opción de autoguardado es muy util para que tan solo tengas que poner este comando en tu script: java -jar MSXTools.jar -m=b -0=file.spr
+
+<img src="data/readme/spriteEditor.PNG" width="400px">
+
+
+
+
