@@ -2,15 +2,19 @@ package es.tipolisto.MSXTools;
 import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import javax.swing.*;
 
+import es.tipolisto.MSXTools.beans.Sprite;
 import es.tipolisto.MSXTools.gui.CompressWindow;
 import es.tipolisto.MSXTools.gui.MainWindow;
 import es.tipolisto.MSXTools.utils.ConvertDeleteComents;
 import es.tipolisto.MSXTools.utils.CovertCSVTSXToASM;
+import es.tipolisto.MSXTools.utils.FileManager;
 import es.tipolisto.MSXTools.utils.IMG2SC;
 
  
@@ -128,7 +132,27 @@ public class Main {
 						}
 					}else {
 						System.out.println("Choose a file");
-					}				
+					}	
+					//con m=b convertirmos un archivo spr a basic sc5
+				}else if (args[mIndex].length()>2 && args[mIndex].indexOf("b")!=-1) {
+					System.out.println("Let's convert spr to basic sc5...");
+					//1.Creamos un arrayList de sprites
+					ArrayList<Sprite> arrayListSprites=new ArrayList<Sprite>();
+					//2.Obtenemos los sprites
+					try {
+						arrayListSprites.clear();
+						ObjectInputStream objectInputputStream=new ObjectInputStream(new FileInputStream(originFile));
+						Sprite[] sprites=(Sprite[]) objectInputputStream.readObject();
+						for (int i2=0;i2<sprites.length;i2++) {
+							Sprite sprite=sprites[i2];
+							arrayListSprites.add(sprite);
+						}
+						objectInputputStream.close();
+						FileManager.createdFileBasicDecimal((byte)5,(byte)2, arrayListSprites, false);	
+					}catch(Exception ex) {
+						JOptionPane.showMessageDialog(null,  "Exception "+ex);
+					}
+					
 				}else {
 					System.out.println("Mode found but not defined");
 					System.exit(0);
@@ -165,6 +189,9 @@ public class Main {
 						//crear archivo asm sjasm a patir de tmx/csv
 					}else if (option.equals("a")) {
 						ok=true;
+						//Convertir archivo spr en basic sc5
+					}else if (option.equals("b")) {
+						ok=true;
 					}
 				}else {
 					System.out.println("Impossible read "+originFile);
@@ -181,6 +208,9 @@ public class Main {
 					System.out.println("File "+originFile+" not found."); 
 					ok=false;
 				}else if (option.equals("a")) {
+					System.out.println("File "+originFile+" not found."); 
+					ok=false;
+				}else if (option.equals("b")) {
 					System.out.println("File "+originFile+" not found."); 
 					ok=false;
 				}
@@ -239,6 +269,7 @@ public class Main {
 		System.out.println("-m=a for converter file tsx to file asm sjasm");
 		System.out.println("-m=s for converter BMP image to sc5");
 		System.out.println("-m=t for converter PNG image to sc5");
+		System.out.println("-m=b for converter SPR file to basic sc5 code");
 		System.out.println("Examples:");
 		System.out.println("java -jar -m=s -o=assets\\test.bmp");
 		System.out.println("java -jar -m=t -o=test.png");

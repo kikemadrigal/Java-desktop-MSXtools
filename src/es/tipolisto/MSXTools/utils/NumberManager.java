@@ -25,6 +25,10 @@ public class NumberManager {
 	    return hexadecimal;
 	}
 	
+	public static int hexadecimalToDecimal(String hexadecimal) {
+		return Integer.parseInt(hexadecimal, 16);
+	}
+	
 	private static String convertToBinary(String cadena) {
 		//Si es 0 e el color de frente, 1 color de fondo y 2 sin color
 		int contador0=0;

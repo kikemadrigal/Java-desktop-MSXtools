@@ -11,6 +11,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
+import es.tipolisto.MSXTools.beans.Sprite;
+
 public class FileManager {
 
 	public FileManager() {}
@@ -169,4 +173,90 @@ public class FileManager {
 		return ok;
 	}
 	
+	
+	
+	public static void createdFileBasicDecimal(byte screen, byte spriteVideo, ArrayList<Sprite>arrayListSprites, boolean showMessahe) {
+		ArrayList<String> arrayListString=new ArrayList<String>();
+		int numberLine=10200;
+		int objetcs=arrayListSprites.size()-1;
+		arrayListString.add(numberLine+" screen "+screen+","+spriteVideo);
+		numberLine+=10;
+		arrayListString.add(numberLine+" for i=0 to "+objetcs+":sp$=\"\"");
+		numberLine+=10;
+		arrayListString.add("\t"+numberLine+" for j=0 to 31");
+		numberLine+=10;
+		arrayListString.add("\t\t"+numberLine+" read a$");
+		numberLine+=10;
+		arrayListString.add("\t\t"+numberLine+" sp$=sp$+chr$(val(a$))");
+		numberLine+=10;
+		arrayListString.add("\t"+numberLine+" next J");
+		numberLine+=10;
+		arrayListString.add("\t"+numberLine+" sprite$(i)=sp$");
+		numberLine+=10;
+		arrayListString.add(numberLine+" next i");
+		numberLine+=10;
+		
+		if(screen==5) {
+			arrayListString.add(numberLine+" for i=0 to "+objetcs+":sp$=\"\"");
+			numberLine+=10;
+			arrayListString.add("\t"+numberLine+" for j=0 to 15");
+			numberLine+=10;
+			arrayListString.add("\t\t"+numberLine+" read a$");
+			numberLine+=10;
+			//arrayListString.add("\t\t"+numberLine+" sp$=sp$+chr$(val(\"&h\"+a$))");
+			arrayListString.add("\t\t"+numberLine+" sp$=sp$+chr$(val(a$))");
+			numberLine+=10;
+			arrayListString.add("\t"+numberLine+" next J");
+			numberLine+=10;
+			arrayListString.add("\t"+numberLine+" color sprite$(i)=sp$");
+			numberLine+=10;
+			arrayListString.add(numberLine+" next I");
+			numberLine+=10;
+		}
+
+		arrayListString.add(numberLine+" rem sprites data definitions");
+		numberLine+=10;
+		
+		for (Sprite sprite: arrayListSprites) {
+			arrayListString.add(numberLine+" rem data definition sprite "+sprite.getNumber()+", name: "+sprite.getName());
+			String dataDefinitions=sprite.getDataDefinition();
+			String[] stringsDefinitions=dataDefinitions.split("\n");
+			for(String linea: stringsDefinitions) {
+				arrayListString.add(numberLine+" data "+linea);
+				numberLine+=10;
+			}	
+		}
+		
+		for (Sprite sprite: arrayListSprites) {
+			arrayListString.add(numberLine+" rem data colors definitions sprite "+sprite.getNumber()+", name: "+sprite.getName());
+			 if(screen==5) {
+				String dataColors=sprite.getDataColors();
+				String[] stringsColors=dataColors.split("\n");
+				for(String linea: stringsColors) {
+					arrayListString.add(numberLine+" data "+linea);
+					numberLine+=10;
+				}
+			}
+		}
+		for (Sprite sprite: arrayListSprites) {
+			if(screen==2) {
+				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",(20*"+sprite.getNumber()+",100),2,"+sprite.getNumber());
+			}else if(screen==5) {
+				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",(20*"+sprite.getNumber()+",100),,"+sprite.getNumber());
+			}
+			numberLine+=10;
+		}
+		arrayListString.add(numberLine+" goto "+numberLine);
+		FileManager fileManager=new FileManager();
+		fileManager.writeFile(new File("sprites.bas"), arrayListString);
+		//creamos el autoexec.bas
+		ArrayList<String> arrayListStringAutoexec=new ArrayList<String>();
+		arrayListStringAutoexec.add("10 load\"sprites.bas\",r");
+		fileManager.writeFile(new File("autoexec.bas"), arrayListStringAutoexec);
+		
+		if(showMessahe)
+			JOptionPane.showMessageDialog(null, "Created basic File");
+		else
+			System.out.println("Created basic File");
+	}
 }
