@@ -29,6 +29,7 @@ Puedes:
     2 Exportarlos a un archivo basic
     3 Exportarlos a un archivo binario
     4 La opción de autoguardado es muy util para que tan solo tengas que poner este comando en tu script: java -jar MSXTools.jar -m=b -0=file.spr
+    5 Ejecutar openMSX con estos archivos.
 
 <img src="data/readme/spriteEditor.PNG" width="400px">
 
