@@ -14,8 +14,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 import es.tipolisto.MSXTools.beans.Pixel;
 import es.tipolisto.MSXTools.beans.Sprite;
@@ -29,22 +29,26 @@ import utils.ImageManager;
  * 
  */
 public class RiboonSpriteEditor extends JPanel{
-	private static final long serialVersionUID = 1L;
-	
+
+	private static final long serialVersionUID = 6563947585862209486L;
 	private PaneDrawableSpriteEditor canvas;
 	private ArrayList<Sprite> arrayListSprites;
-	private JLabel lblSpriteNumber,lblSpriteName;
+	private JLabel lblSpriteNumberOnCanvas;
+	private JLabel lblNumberSpriteRiboon,lblNameSpriteRiboon;
+	private JTextField jtFieldNameSpriteOnCanvas;
 	private JTextArea textAreaDefinition,textAreaColors;
 	private JButton[] jButtons0,jButtons1;
 
 	//private JScrollPane jscrollPanelImageSprites;
 	private Dimension dimensionJScrollPaneSprites;
 
-	private Sprite spriteSelected;
+	private Sprite spriteOnRiboonSelected;
 	
 	public RiboonSpriteEditor(PaneDrawableSpriteEditor canvas,
 			ArrayList<Sprite> arrayListSprites,
-			JLabel lblSpriteNumber,JLabel lblSpriteName,
+			JLabel lblSpriteNumberOnCanvas,
+			JLabel lblNumberSpriteRiboon,JLabel lblNameSpriteRiboon,
+			JTextField jtFieldNameSpriteOnCanvas,
 			JTextArea textAreaDefinition, JTextArea textAreaColors,
 			JButton[] jButtons0, JButton[] jButtons1) {
 		
@@ -56,11 +60,18 @@ public class RiboonSpriteEditor extends JPanel{
 		this.arrayListSprites=arrayListSprites;
 		this.textAreaDefinition=textAreaDefinition;
 		this.textAreaColors=textAreaColors;
-		this.lblSpriteNumber=lblSpriteNumber;
-		this.lblSpriteName=lblSpriteName;
+		this.lblSpriteNumberOnCanvas=lblSpriteNumberOnCanvas;
+		this.lblNumberSpriteRiboon=lblNumberSpriteRiboon;
+		this.lblNameSpriteRiboon=lblNameSpriteRiboon;
+		this.jtFieldNameSpriteOnCanvas=jtFieldNameSpriteOnCanvas;
 		this.jButtons0=jButtons0;
 		this.jButtons1=jButtons1;
-		spriteSelected=new Sprite(0,0,0,"Sprite_name0");
+		
+		if(arrayListSprites.size()==0) {
+			lblNumberSpriteRiboon.setText("X");
+			lblNameSpriteRiboon.setText("No sprite selected");
+		}
+		
 	}
 	
 	public void setDimension(Dimension dimensionJScrollPaneSprites) {
@@ -127,23 +138,21 @@ public class RiboonSpriteEditor extends JPanel{
 			public void mouseClicked(MouseEvent e) {
 				if(e.getButton()==MouseEvent.BUTTON1) {
 					if (e.getClickCount() == 2) {
+						//Cuando hacemos dos clicks es que queremos editarlo y por lo tanto se mete en el canvas
 						showSpriteOnContentPane(sprite);
-						spriteSelected=sprite;						
-					}else {
-						spriteSelected=sprite;
-						updateBorders(sprite);
+						canvas.setSpriteOnCanvasSelected(sprite);	
 					}
+					spriteOnRiboonSelected=sprite;	
+					lblNumberSpriteRiboon.setText(""+sprite.getNumber());
+					lblNameSpriteRiboon.setText(sprite.getName());
+					updateBorders(sprite);
+					//Menú borrar
 				}else if(e.getButton()==MouseEvent.BUTTON3) {
-					int input = JOptionPane.showConfirmDialog(null, "Delete item?");
-			        // 0=yes, 1=no, 2=cancel
-					if(input==0) {
-						arrayListSprites.remove(sprite.getNumber());
-						System.out.println("borrado el "+sprite.getNumber());
-						updateAllRiboon();
-					}
+					spriteOnRiboonSelected=sprite;
+					updateBorders(sprite);
+					deleteSprite(sprite);
 				}	
 			}
-
 		});
 	}
 	
@@ -154,13 +163,19 @@ public class RiboonSpriteEditor extends JPanel{
 		BufferedImage bufferedImageScaled=getBufferedImageButton(sprite);
 		//Creamos su JButton, le ponemos la imagen y le aplicamos los comportamientos
 		createButtonRiboon(sprite,bufferedImageScaled);
+		repaint();
+		//La seleccionamos y ponemos el borde
+		spriteOnRiboonSelected=sprite;
+		lblNumberSpriteRiboon.setText(""+sprite.getNumber());
+		lblNameSpriteRiboon.setText(sprite.getName());
+		updateBorders(sprite);
 	}
 	
 	
 	
 	public void updateAllRiboon(){
 		//Limpiamos todo los pixeles del canvas
-		canvas.deleteAll();
+		//canvas.deleteAll();
 		//Limpiamos todo el riboon
 		removeAll();
 		repaint();
@@ -172,12 +187,13 @@ public class RiboonSpriteEditor extends JPanel{
 			BufferedImage bufferedImageScaled=getBufferedImageButton(sprite);
 			createButtonRiboon(sprite,bufferedImageScaled);
 			countNumberSprite++;
-		}		
+		}	
+		updateBorders(spriteOnRiboonSelected);
 	}
 	
 	
-	private void showSpriteOnContentPane(Sprite sprite) {
-		//1.Obtenemos el color de los botones y se los asignamos al contentPane
+	public void showSpriteOnContentPane(Sprite sprite) {
+		//1.Obtenemos el color de los botones y se los asignamos al jFrame
 		Color[] colorButtons0Sprite=sprite.getColorButtons0();
 		Color[] colorButtons1Sprite=sprite.getColorButtons1();
 		for (int i=0;i<jButtons0.length;i++) {
@@ -209,11 +225,11 @@ public class RiboonSpriteEditor extends JPanel{
 		textAreaColors.setText(dataColors);		
 		
 		//Ponemos el nombre y número
-		//contentPane.repaint();
-		lblSpriteNumber.setText(String.valueOf(sprite.getNumber()));
-		lblSpriteName.setText(sprite.getName());
-		//lblSpriteNumber.setBackground(Color.WHITE);
-		//lblSpriteName.setBackground(Color.WHITE);
+		lblSpriteNumberOnCanvas.setText(String.valueOf(sprite.getNumber()));
+		jtFieldNameSpriteOnCanvas.setText(sprite.getName());
+		
+		//Se lo ponemos al canvas
+		//canvas.setSpriteOnCanvasSelected(sprite);
 	}
 
 
@@ -224,14 +240,14 @@ public class RiboonSpriteEditor extends JPanel{
 	public void moveSpriteLeftOnRiboon() {
 		for(int i=0;i<arrayListSprites.size();i++) {
 			Sprite sprite=arrayListSprites.get(i);
-			if(sprite.getNumber()==spriteSelected.getNumber() && i>0) {
+			if(sprite.getNumber()==spriteOnRiboonSelected.getNumber() && i>0) {
 				//Cogemos el sprite anterior
 				Sprite spriteHelp=arrayListSprites.get(i-1);
 				//ponemos nuestro sprite seleccionado en la posición anterior
-				arrayListSprites.set(i-1, spriteSelected);
+				arrayListSprites.set(i-1, spriteOnRiboonSelected);
 				//Ponemos el sprite guardado en la posición siguiente
 				arrayListSprites.set(i, spriteHelp);
-				lblSpriteNumber.setText(String.valueOf(i-1));
+				lblSpriteNumberOnCanvas.setText(String.valueOf(i-1));
 			}
 		}	
 	}
@@ -239,16 +255,15 @@ public class RiboonSpriteEditor extends JPanel{
 	public void moveSpriteRightOnRiboon() {
 		for(int i=arrayListSprites.size()-1;i>=0;i--) {
 			Sprite sprite=arrayListSprites.get(i);
-			if(sprite.getNumber()==spriteSelected.getNumber() && i<arrayListSprites.size()-1) {
+			if(sprite.getNumber()==spriteOnRiboonSelected.getNumber() && i<arrayListSprites.size()-1) {
 				//Cogemos el sprite siguente
 				Sprite spriteHelp=arrayListSprites.get(i+1);
 				//Metemos el seleccionado en la i
-				arrayListSprites.set(i+1, spriteSelected);
+				arrayListSprites.set(i+1, spriteOnRiboonSelected);
 				//Ponemos el sprite guardado en la posición siguiente
 				arrayListSprites.set(i, spriteHelp);	
-				lblSpriteNumber.setText(String.valueOf(i+1));
-			}
-			
+				lblSpriteNumberOnCanvas.setText(String.valueOf(i+1));
+			}	
 		}	
 	}
 	
@@ -256,7 +271,7 @@ public class RiboonSpriteEditor extends JPanel{
 	public void updateBorders(Sprite sprite) {
 		for(int i=0;i<arrayListSprites.size();i++) {
 			JButton button=(JButton) getComponent(i);
-			if(spriteSelected.getNumber()!=arrayListSprites.get(i).getNumber()) {
+			if(spriteOnRiboonSelected.getNumber()!=arrayListSprites.get(i).getNumber()) {
 				button=(JButton) getComponent(i);
 				button.setBorder(null);
 			}else {
@@ -265,8 +280,29 @@ public class RiboonSpriteEditor extends JPanel{
 		}
 	}
 	
-	public Sprite getSpriteSelected() {
-		return spriteSelected;		
+	public Sprite getSpriteOnRiboonSelected() {
+		return spriteOnRiboonSelected;		
 	}
 	
+	public void deleteSprite(Sprite sprite) {
+		int input = JOptionPane.showConfirmDialog(null, "Delete item?");
+        // 0=yes, 1=no, 2=cancel
+		if(input==0) {
+			Sprite spriteNext=null;
+			if(arrayListSprites.size()<=1)
+				spriteNext=arrayListSprites.get(0);
+			//Si el tamaño es mayor que 1
+			else
+				if(spriteOnRiboonSelected.getNumber()==0) 
+					spriteNext=arrayListSprites.get(1);
+				else
+					spriteNext=arrayListSprites.get(sprite.getNumber()-1);
+			spriteOnRiboonSelected=spriteNext;
+			lblNumberSpriteRiboon.setText(""+spriteNext.getNumber());
+			lblNameSpriteRiboon.setText(spriteNext.getName());
+			arrayListSprites.remove(sprite.getNumber());
+			//System.out.println("borrado el "+sprite.getNumber());
+			updateAllRiboon();
+		}
+	}
 }

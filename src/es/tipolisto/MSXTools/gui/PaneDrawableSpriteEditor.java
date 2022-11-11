@@ -8,33 +8,20 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.geom.Line2D;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map.Entry;
+
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTextArea;
-
 import es.tipolisto.MSXTools.beans.Pixel;
-import es.tipolisto.MSXTools.beans.RGB;
+import es.tipolisto.MSXTools.beans.Sprite;
 import es.tipolisto.MSXTools.menus.MainMenuSpriteEditor;
-import es.tipolisto.MSXTools.utils.MSXPalette;
 import es.tipolisto.MSXTools.utils.NumberManager;
-import es.tipolisto.MSXTools.utils.Palettes;
+
 import utils.ImageManager;
 
 
@@ -46,11 +33,10 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	private int borderY;
 	private int maxWidth;
 	private int maxHeight; 
-	private int sizeTile;
+	private int pixelSizeOfRenderCanvas;
 	private int pixelX;
 	private int pixelY;
-	private int pixelOldX;
-	private int pixelOldY;
+
 	private int horizontalTiles;
 	private int verticalTiles;
 	private boolean autoSaved;
@@ -68,30 +54,30 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	private Color deleteColor;
 	private boolean selectedClear;
 	private boolean paintBot;
-	private byte paintBotX;
-	private byte paintBotY;
-	
+	//Cuando haces dos clics en el riboon le asignas a esta variable el sprite
+	private Sprite spriteOnCanvasSelected;
+
 	public PaneDrawableSpriteEditor(int horizontalTiles, int verticalTiles) {
 		borderX=120;
 		borderY=120;
-		sizeTile=20;
-		maxWidth=(sizeTile*horizontalTiles)+borderX;
-		maxHeight=(sizeTile*verticalTiles)+borderY;
+		pixelSizeOfRenderCanvas=20;
+		maxWidth=(pixelSizeOfRenderCanvas*horizontalTiles)+borderX;
+		maxHeight=(pixelSizeOfRenderCanvas*verticalTiles)+borderY;
 		setBounds(borderX, borderY, maxWidth-borderX+1, maxHeight-borderY+1);
 		pixelX=borderX;
 		pixelY=borderY;
-		pixelOldX=0;
-		pixelOldY=0;
+
 		this.horizontalTiles=horizontalTiles;
 		this.verticalTiles=verticalTiles;
 		this.jButtons0=jButtons0;
 		this.jButtons1=jButtons1;
+
 		//El canvas tendrá un array de pixeles independiente
-		pixels=new Pixel[16][16];
+		pixels=new Pixel[horizontalTiles][verticalTiles];
 		deleteColor=new Color(239,252,254);
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
-				Pixel pixel=new Pixel((x*sizeTile),(y*sizeTile),(byte)2,deleteColor);
+				Pixel pixel=new Pixel((x*pixelSizeOfRenderCanvas),(y*pixelSizeOfRenderCanvas),(byte)2,deleteColor);
 				pixels[x][y]=pixel;
 			}
 		}
@@ -99,32 +85,12 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 		clickedButton3=false;
 		selectedClear=false;
 		paintBot=false;
-		paintBotX=0;
-		paintBotY=0;
 		this.requestFocusInWindow();
 		addMouseMotionListener(this);
 		addMouseListener(this);
 	}
 	
-	
-	public JButton[] getjButtons0() {
-		return jButtons0;
-	}
 
-
-	public void setjButtons0(JButton[] jButtons0) {
-		this.jButtons0 = jButtons0;
-	}
-
-
-	public JButton[] getjButtons1() {
-		return jButtons1;
-	}
-
-
-	public void setjButtons1(JButton[] jButtons1) {
-		this.jButtons1 = jButtons1;
-	}
 
 
 
@@ -133,18 +99,18 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 		Graphics2D g2 = (Graphics2D) g;
 		g.setColor(Color.PINK);
         g2.setStroke(new BasicStroke(3));
-        g2.draw(new Line2D.Float(-10,(8*sizeTile),maxWidth, maxHeight-(14*sizeTile)));
-        g2.draw(new Line2D.Float((8*sizeTile),-10,maxWidth-(14*sizeTile), maxHeight+10));
+        g2.draw(new Line2D.Float(0,((verticalTiles/2)*pixelSizeOfRenderCanvas),maxWidth, ((verticalTiles/2)*pixelSizeOfRenderCanvas)));
+        g2.draw(new Line2D.Float(((horizontalTiles/2)*pixelSizeOfRenderCanvas),0,((horizontalTiles/2)*pixelSizeOfRenderCanvas), maxHeight));
         g2.setStroke(new BasicStroke(1));
 		g.setColor(Color.BLACK);
 		//Dibujamos las lineas horizontales
-		for (int i=0;i<=sizeTile*horizontalTiles+1;i+=sizeTile) {
-			g.drawLine(0, i, sizeTile*horizontalTiles, i);
+		for (int i=0;i<=pixelSizeOfRenderCanvas*horizontalTiles+1;i+=pixelSizeOfRenderCanvas) {
+			g.drawLine(0, i, pixelSizeOfRenderCanvas*horizontalTiles, i);
 			//System.out.println("borderX: "+borderX+" i+1: "+y+" Total: "+sizeTile*horizontalTiles);
 		}
 		//Dubjamos las líneas verticales	
-		for (int i=0;i<=sizeTile*verticalTiles+1;i+=sizeTile) {
-			g.drawLine(i, 0, i, sizeTile*verticalTiles);
+		for (int i=0;i<=pixelSizeOfRenderCanvas*verticalTiles+1;i+=pixelSizeOfRenderCanvas) {
+			g.drawLine(i, 0, i, pixelSizeOfRenderCanvas*verticalTiles);
 		}
 	
 		//Seleccionamos el area donde vamos a pintar
@@ -154,9 +120,8 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	//Al pulsar enter pintaremos un cuadrado de un color
 	public void paintPixelAtPoint(int x, int y, byte colorBackOrFront){
 		Graphics g=this.getGraphics();
-
 		//Para obtener el botón 
-		int row=y/sizeTile;
+		int row=y/pixelSizeOfRenderCanvas;
 		Color colorJButton=new Color(0,0,0);
 		if (colorBackOrFront==0) {
 			colorJButton=jButtons0[row].getBackground();
@@ -166,19 +131,19 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 			colorJButton=deleteColor;
 		}
 		g.setColor(colorJButton);
-		g.fillRect(x+1, y+1, sizeTile-1,sizeTile-1);
+		g.fillRect(x+1, y+1, pixelSizeOfRenderCanvas-1,pixelSizeOfRenderCanvas-1);
 		//Escribimos en el array de los pixeles la información que necesitamos para poder trabajar depués con él
 		//int positionOnArrayColumn=(x-borderX)/sizeTile;
 		//int positionOnArrayFile=(y-borderY)/sizeTile;
-		int positionOnArrayColumn=(x)/sizeTile;
-		int positionOnArrayFile=(y)/sizeTile;
+		int positionOnArrayColumn=(x)/pixelSizeOfRenderCanvas;
+		int positionOnArrayFile=(y)/pixelSizeOfRenderCanvas;
 
 		pixels[positionOnArrayColumn][positionOnArrayFile].setPositionX(x);
 		pixels[positionOnArrayColumn][positionOnArrayFile].setPositionY(y);
 		pixels[positionOnArrayColumn][positionOnArrayFile].setForOrBrackground(colorBackOrFront);
 		pixels[positionOnArrayColumn][positionOnArrayFile].setColor(colorJButton);
 		drawLinesAndExes(g);
-		g.dispose();
+		//g.dispose();
 		//Si está activa el autoguardado lo guardamos
 		if (autoSaved) menuBar.saveFile(false);
 	}
@@ -189,16 +154,16 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 		//System.out.println("Vamos a pintar un marco pixel en "+x+" "+y);
 		g.setColor(Color.BLACK);
 		//g.fillRect(x, y, sizeTile,sizeTile);
-		g.drawRect(x, y, sizeTile,sizeTile);
+		g.drawRect(x, y, pixelSizeOfRenderCanvas,pixelSizeOfRenderCanvas);
 	}
 	public void deletePixelAtPoint(Graphics g, int x, int y){
 		g.setColor(Color.WHITE);
-		g.fillRect(x, y, sizeTile,sizeTile);
+		g.fillRect(x, y, pixelSizeOfRenderCanvas,pixelSizeOfRenderCanvas);
 	}
 	public void deleteFrameAtPoint(Graphics g, int x, int y){
 		g.setColor(null);
 		//g.drawRect(x, y, sizeTile,sizeTile);
-		g.fillRect(x, y, sizeTile,sizeTile);
+		g.fillRect(x, y, pixelSizeOfRenderCanvas,pixelSizeOfRenderCanvas);
 	}
 	public void deleteAll(){
 		for(int y=0;y<pixels.length;y++) {
@@ -208,25 +173,26 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 		}
 	}
 	public void paintPotPixels(int pointX, int pointY){
-		//Obtenemos el color del pixel de esa fila
-		int positionOnArrayColumn=(pointX-borderX)/sizeTile;
-		int positionOnArrayFile=(pointY-borderY)/sizeTile;
-		Pixel pixel=pixels[positionOnArrayColumn][positionOnArrayFile];
-		Pixel nextPixel=pixels[positionOnArrayColumn][positionOnArrayFile];
-		Color colorPixel=pixel.getColor();
-		Color colorNextPixel=nextPixel.getColor();
-		int count=0;
-		while(count<16*16 && colorPixel.getRed()==colorNextPixel.getRed() && colorPixel.getGreen()==colorNextPixel.getGreen() && colorPixel.getBlue()==colorNextPixel.getBlue()) {
-			positionOnArrayColumn++;
-			if(positionOnArrayColumn>15) {
-				positionOnArrayColumn=0;
-				positionOnArrayFile++;
+		int row=pointY/pixelSizeOfRenderCanvas;
+		int column=pointX/pixelSizeOfRenderCanvas;
+		Color colorJButton=new Color(0,0,0);
+		colorJButton=jButtons0[row].getBackground();
+		Pixel[][] pixels=getPixels();
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
+		for(int y=0;y<pixels.length;y++) {
+			for(int x=0;x<pixels[0].length;x++) {
+				Pixel pixel=pixels[x][y];	
+				//Cogemos su color
+				if(y==row) {
+					//System.out.println("Estas sobre el color "+PaletteManager.getNameColorOnPalette(color));
+					pixelsHelp[x][y]=new Pixel(pixel.getPositionX(),pixel.getPositionY(), (byte)0, colorJButton);
+				}else {
+					pixelsHelp[x][y]=new Pixel(pixel.getPositionX(),pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
+				}
 			}
-			if(positionOnArrayFile>15)positionOnArrayFile=0;
-			nextPixel=pixels[positionOnArrayColumn][positionOnArrayFile];
-			paintPixelAtPoint(pixels[positionOnArrayColumn][positionOnArrayFile].getPositionX(), pixels[positionOnArrayColumn][positionOnArrayFile].getPositionY(), (byte)0);
-			count++;
 		}
+		deleteAll();
+		fillPixellOnCanvas(pixelsHelp);
 	}
 	
 	public void fillPixellOnCanvas(Pixel[][] pixelsHelp) {
@@ -286,12 +252,12 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 		this.pixels = pixels;
 	}
 
-	public int getSizeTile() {
-		return sizeTile;
+	public int getPixelSizeOfRenderCanvas() {
+		return pixelSizeOfRenderCanvas;
 	}
 
-	public void setSizeTile(int sizeTile) {
-		this.sizeTile = sizeTile;
+	public void setPixelSizeOfRenderCanvas(int pixelSizeOfRenderCanvas) {
+		this.pixelSizeOfRenderCanvas = pixelSizeOfRenderCanvas;
 	}
 	public boolean isSelectedClear() {
 		return selectedClear;
@@ -327,126 +293,129 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	public String getFileAutoSaved() {
 		return fileAutoSaved;
 	}
+	
+
+	public JButton[] getjButtons0() {
+		return jButtons0;
+	}
+
+
+	public void setjButtons0(JButton[] jButtons0) {
+		this.jButtons0 = jButtons0;
+	}
+
+
+	public JButton[] getjButtons1() {
+		return jButtons1;
+	}
+
+
+	public void setjButtons1(JButton[] jButtons1) {
+		this.jButtons1 = jButtons1;
+	}
+
+	public void setSpriteOnCanvasSelected(Sprite spriteOnCanvasSelected) {
+		this.spriteOnCanvasSelected=spriteOnCanvasSelected;
+	}
+	public Sprite getSpriteOnCanvasSelected() {
+		return this.spriteOnCanvasSelected;
+	}
 	/*************End Getters and setters************************/
 
 
 
-	/******************MouseListener*****************************/
-	@Override
-	public void mouseClicked(MouseEvent e) {}
-
-	/**
-	 * Al pinchar posicionamos la x e y en la posición correcta
-	 */
-	@Override
-	public void mousePressed(MouseEvent e) {
-		Point point=e.getPoint();
-		float positionX=point.x;
-		float positionY=point.y;
-		//System.out.println(" x: "+positionX+" y: "+positionY);
-		//esto es para obtener un n�mero entero
-		float positionXRelocated=(point.x/sizeTile)*sizeTile;
-		float positionYRelocated=(point.y/sizeTile)*sizeTile;
-		//System.out.println(" x recoloado: "+positionXRelocated+" y recolocado: "+positionYRelocated);
-		if( positionX<maxWidth && positionY<maxHeight) {
-			if(e.getButton()==MouseEvent.BUTTON1) {
-				clickedButton1=true;
-				//Si est� seleccionado el bote de pintura llamos al m�todo que rellena los pixeles
-				if(paintBot) {
-					paintPotPixels((int)positionXRelocated,(int)positionYRelocated);
-				}else {
-					if(selectedClear) {
-						paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)2);
-					}else {
-						paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)0);
-					}
-				}	
-			}else if(e.getButton()==MouseEvent.BUTTON3) {
-				clickedButton3=true;
-				paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)1);
+	public void fillTextAreaDefinitionAndColor() {
+		if(horizontalTiles==8 && verticalTiles==8) {
+			String[] dataDefinition=getDataDefinition8x8pixels();
+			String stringDataDenition="";
+			for (int x=0;x<4;x++) {
+				for (int i=0;i<dataDefinition.length;i++) {
+					stringDataDenition+=dataDefinition[x]+",";
+				}
+				stringDataDenition+="\n";
 			}
-		}else {
-			//System.out.println("No se pudo: x: "+positionX+", y:"+positionY+", maxWidth: "+maxWidth+", mazHeight: "+maxHeight);
-		}
-	}
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		clickedButton1=false;
-		clickedButton3=false;
-		fillTextAreaDefinitionAndColot();
-	}
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-	@Override
-	public void mouseExited(MouseEvent e) {}
-	/******************End MouseListener*****************************/
-
-	/******************MouseMotionListener*****************************/
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		Point point=e.getPoint();
-		float positionX=point.x;
-		float positionY=point.y;
-		//System.out.println(" x: "+positionX+" y: "+positionY);
-		//esto es para obtener un n�mero entero
-		float positionXRelocated=(point.x/sizeTile)*sizeTile;
-		float positionYRelocated=(point.y/sizeTile)*sizeTile;
-		//System.out.println(" x recoloado: "+positionXRelocated+" y recolocado: "+positionYRelocated);
-		if(  positionXRelocated>=0 && positionXRelocated<maxWidth-borderX && positionYRelocated>=0 && positionYRelocated<maxHeight-borderY) {
-			if(clickedButton1) {
-				//Si est� seleccionado el bote de pintura llamos al m�todo que rellena los pixeles
-				if(paintBot) {
-					paintPotPixels((int)positionXRelocated,(int)positionYRelocated);
-				}else {
-					if(selectedClear) {
-						paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)2);
-					}else {
-					    paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)0);	
-					}
-				}	
-			}else if(clickedButton3) {
-				paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)1);
-			}
-		}else {
-			//System.out.println("No se pudo: x: "+positionX+", y:"+positionY+", maxWidth: "+maxWidth+", mazHeight: "+maxHeight);
-		}
-	}
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		//System.out.println("mousemoved dice: x: "+e.getX()+", y: "+e.getY());
-	}
-	/******************End MouseMotionListener*****************************/
-	
-	public void fillTextAreaDefinitionAndColot() {
-		String[][] dataDefinition=getDataDefinition();
-		String stringDataDenition="";
-		for (int x=0;x<4;x++) {
-			for (int i=0;i<dataDefinition[0].length;i++) {
-				if(i==dataDefinition[x].length-1)
-					stringDataDenition+=dataDefinition[x][i];
+			textAreaDefinition.setText("WIP");
+			//0 convertir a decimal, 1 convertir a hexadecimal
+			String[] definitionColors=getDataColors8x8Pixels((byte)0);
+			String definitionColor="";
+			for(int i=0;i<definitionColors.length;i++) {
+				if(i==definitionColors.length-1)
+					definitionColor+=definitionColors[i];
 				else
-					stringDataDenition+=dataDefinition[x][i]+",";
+					definitionColor+=definitionColors[i]+",";
 			}
-			stringDataDenition+="\n";
+			textAreaColor.setText(definitionColor);
+			
+		}else if(horizontalTiles==16 && verticalTiles==16) {
+			String[][] dataDefinition=getDataDefinition16x16pixels();
+			String stringDataDenition="";
+			for (int x=0;x<4;x++) {
+				for (int i=0;i<dataDefinition[0].length;i++) {
+					if(i==dataDefinition[x].length-1)
+						stringDataDenition+=dataDefinition[x][i];
+					else
+						stringDataDenition+=dataDefinition[x][i]+",";
+				}
+				stringDataDenition+="\n";
+			}
+			textAreaDefinition.setText(stringDataDenition);
+			//0 convertir a decimal, 1 convertir a hexadecimal
+			String[] definitionColors=getDataColors16x16pixels((byte)0);
+			String definitionColor="";
+			for(int i=0;i<definitionColors.length;i++) {
+				if(i==definitionColors.length-1)
+					definitionColor+=definitionColors[i];
+				else
+					definitionColor+=definitionColors[i]+",";
+			}
+			textAreaColor.setText(definitionColor);
 		}
-		textAreaDefinition.setText(stringDataDenition);
-		//0 convertir a decimal, 1 convertir a hexadecimal
-		String[] definitionColors=getDataColors((byte)0);
-		String definitionColor="";
-		for(int i=0;i<definitionColors.length;i++) {
-			if(i==definitionColors.length-1)
-				definitionColor+=definitionColors[i];
-			else
-				definitionColor+=definitionColors[i]+",";
-		}
-		textAreaColor.setText(definitionColor);
+		
 	}
-	
+	private String[] getDataColors8x8Pixels(byte mode) {
+		String[] arrayDefinitionColors=new String[8];
+		//El caracter de la izquierda es el color de fondo, el de la dereecha es el de frente
+		StringBuilder resultColors = new StringBuilder("00");
+		Pixel[][] pixels;
+		pixels=getPixels();
+		for(int y=0;y<pixels.length;y++) {
+			for(int x=0;x<pixels[0].length;x++) {
+				Pixel pixel=pixels[x][y];
+				Color color=pixel.getColor();
+				int positionColorOnPalette=ImageManager.getPositionColorOnPalette(color);
+				String stringPositionColorOnPalette=NumberManager.decimalAHexadecimal(positionColorOnPalette);
+				char[] charArray=stringPositionColorOnPalette.toCharArray();
+				char charPositionColorOnPalette='0';
+				if(charArray.length>0)
+					charPositionColorOnPalette=charArray[0];
+				byte foreOrBackGround=pixel.getForOrBrackground();
+				
+				//i es el color de frente (0) lo ponemos en la derecha de los 2 caracteres
+				if(foreOrBackGround==0) {
+					resultColors.setCharAt(1, charPositionColorOnPalette);
+				//Si es el color de fondo (1) lo ponemos en la izquierda
+				}else if(foreOrBackGround==1) {
+					resultColors.setCharAt(0, charPositionColorOnPalette);
+				}else {
+					resultColors.setCharAt(0, '0');
+				}
+				if(mode==0) {
+					int result=NumberManager.hexadecimalToDecimal(resultColors.toString());
+					arrayDefinitionColors[y]=String.valueOf(result);
+				}else if(mode==1) {
+					arrayDefinitionColors[y]=resultColors.toString();
+				}
+			}
+		}
+		return arrayDefinitionColors;
+		
+	}
 	/**
 	 * Devuelve un array de 16 filas con los colores de los pixeles
 	 * Nos  ayudamos de la clase StringBuilder
+	 * el mode nos indica si lo queremos en decimal o hexadecimal
 	 */
-	private String[] getDataColors(byte mode) {
+	private String[] getDataColors16x16pixels(byte mode) {
 		String[] arrayDefinitionColors=new String[16];
 		//El caracter de la izquierda es el color de fondo, el de la dereecha es el de frente
 		StringBuilder resultColors = new StringBuilder("00");
@@ -479,14 +448,34 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 				}else if(mode==1) {
 					arrayDefinitionColors[y]=resultColors.toString();
 				}
-
 			}
-
 		}
 		return arrayDefinitionColors;
 	}
 	
-	private String[][] getDataDefinition() {
+	
+	private String[] getDataDefinition8x8pixels() {
+		StringBuffer cadena=new StringBuffer();
+		Pixel[][] pixels;
+		pixels=getPixels();
+
+		for(int y=0;y<pixels.length;y++) {
+			for(int x=0;x<pixels[0].length;x++) {
+				Pixel pixel=pixels[x][y];
+				byte foreOrBackGround=pixel.getForOrBrackground();
+				cadena.append(foreOrBackGround);
+			}
+		}
+		
+		String[] arrayBytes=new String[16];
+		
+		return arrayBytes;
+	}
+
+	
+	
+	
+	private String[][] getDataDefinition16x16pixels() {
 		StringBuffer cadena=new StringBuffer();
 		Pixel[][] pixels;
 		pixels=getPixels();
@@ -566,14 +555,14 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	public void rotateLandscape() {
 		//System.out.println("Girar horizonatl");
 		Pixel[][] pixels=getPixels();
-		Pixel[][] pixelsHelp=new Pixel[16][16];
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];	
 				int newX=15-x;
 				int newY=15-y;
 				if(x>0)
-					pixelsHelp[x][y]=new Pixel((15*sizeTile)-pixel.getPositionX(),pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
+					pixelsHelp[x][y]=new Pixel((15*pixelSizeOfRenderCanvas)-pixel.getPositionX(),pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
 			}
 		}
 		deleteAll();
@@ -584,25 +573,25 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	public void rotateUpright() {
 		//System.out.println("Girar vertical");
 		//Cambiamos los colores de los botones
-		Color[] colors0=new Color[16];
+		Color[] colors0=new Color[verticalTiles];
 		for(int i=0;i<jButtons0.length;i++) {
 			colors0[i]=jButtons0[i].getBackground();
 		}
 		int countFile=0;
 		for (int i=15;i<jButtons0.length;i--) {
-			if(countFile<16 && countFile>0)
+			if(countFile<verticalTiles && countFile>0)
 				jButtons0[countFile].setBackground(colors0[i]);
 			countFile++;
 		}
 		Pixel[][] pixels=getPixels();
-		Pixel[][] pixelsHelp=new Pixel[16][16];
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];	
 				int newX=15-x;
 				int newY=15-y;
 				if(x>0)
-					pixelsHelp[x][y]=new Pixel(pixel.getPositionX(),(15*sizeTile)-pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
+					pixelsHelp[x][y]=new Pixel(pixel.getPositionX(),(15*pixelSizeOfRenderCanvas)-pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
 			}
 		}
 		deleteAll();
@@ -612,14 +601,14 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	//Girrar a la izquierda
 	public void turnLeft() {
 		Pixel[][] pixels=getPixels();
-		Pixel[][] pixelsHelp=new Pixel[16][16];
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];	
 				int newX=15-x;
 				int newY=15-y;
 				if(x>0)
-					pixelsHelp[x][y]=new Pixel((15*sizeTile)-pixel.getPositionX(),(15*sizeTile)-pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
+					pixelsHelp[x][y]=new Pixel((15*pixelSizeOfRenderCanvas)-pixel.getPositionX(),(15*pixelSizeOfRenderCanvas)-pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
 			}
 		}
 		deleteAll();
@@ -629,14 +618,14 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	//Girar a la derecha
 	public void turnRight() {
 		Pixel[][] pixels=getPixels();
-		Pixel[][] pixelsHelp=new Pixel[16][16];
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];	
 				int newX=15-x;
 				int newY=15-y;
 				if(y<15 && x>0)
-					pixelsHelp[x][y]=new Pixel(pixel.getPositionX()-(15*sizeTile),pixel.getPositionY()-(15*sizeTile), pixel.getForOrBrackground(), pixel.getColor());
+					pixelsHelp[x][y]=new Pixel(pixel.getPositionX()-(15*pixelSizeOfRenderCanvas),pixel.getPositionY()-(15*pixelSizeOfRenderCanvas), pixel.getForOrBrackground(), pixel.getColor());
 			}
 		}
 		deleteAll();
@@ -647,14 +636,14 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 
 	public void moveOneLeft() {
 		Pixel[][] pixels=getPixels();
-		Pixel[][] pixelsHelp=new Pixel[16][16];
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];	
 				int newX=15-x;
 				int newY=15-y;
 				if(x>0)
-					pixelsHelp[x][y]=new Pixel(pixel.getPositionX()-sizeTile,pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
+					pixelsHelp[x][y]=new Pixel(pixel.getPositionX()-pixelSizeOfRenderCanvas,pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
 			}
 		}
 		deleteAll();
@@ -664,14 +653,14 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 
 	public void moveOneRight() {
 		Pixel[][] pixels=getPixels();
-		Pixel[][] pixelsHelp=new Pixel[16][16];
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];	
 				int newX=15-x;
 				int newY=15-y;
 				if(x<15)
-					pixelsHelp[x][y]=new Pixel(pixel.getPositionX()+sizeTile,pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
+					pixelsHelp[x][y]=new Pixel(pixel.getPositionX()+pixelSizeOfRenderCanvas,pixel.getPositionY(), pixel.getForOrBrackground(), pixel.getColor());
 			}
 		}
 		deleteAll();
@@ -680,25 +669,25 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 
 	public void moveOneUp() {
 		//Movemos los colores de los botones 1 arriba
-		Color[] colors0=new Color[16];
+		Color[] colors0=new Color[verticalTiles];
 		for(int i=0;i<jButtons0.length;i++) {
 			colors0[i]=jButtons0[i].getBackground();
 		}
 		for (int i=0;i<jButtons0.length;i++) {
 			int newColorPosition=i+1;
-			if(newColorPosition<16)
+			if(newColorPosition<verticalTiles)
 				jButtons0[i].setBackground(colors0[newColorPosition]);
 		
 		}
 		Pixel[][] pixels=getPixels();
-		Pixel[][] pixelsHelp=new Pixel[16][16];
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];	
 				int newX=15-x;
 				int newY=15-y;
 				if(y>0)
-					pixelsHelp[x][y]=new Pixel(pixel.getPositionX(),pixel.getPositionY()-sizeTile, pixel.getForOrBrackground(), pixel.getColor());
+					pixelsHelp[x][y]=new Pixel(pixel.getPositionX(),pixel.getPositionY()-pixelSizeOfRenderCanvas, pixel.getForOrBrackground(), pixel.getColor());
 			}
 		}
 		deleteAll();
@@ -707,7 +696,7 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 
 	public void moveOneDown() {
 		//Movemos los colores de los botones 1 abajo
-		Color[] colors0=new Color[16];
+		Color[] colors0=new Color[verticalTiles];
 		for(int i=0;i<jButtons0.length;i++) {
 			colors0[i]=jButtons0[i].getBackground();
 		}
@@ -718,14 +707,14 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 		
 		}
 		Pixel[][] pixels=getPixels();
-		Pixel[][] pixelsHelp=new Pixel[16][16];
+		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];	
 				int newX=15-x;
 				int newY=15-y;
 				if(y<15)
-					pixelsHelp[x][y]=new Pixel(pixel.getPositionX(),pixel.getPositionY()+sizeTile, pixel.getForOrBrackground(), pixel.getColor());
+					pixelsHelp[x][y]=new Pixel(pixel.getPositionX(),pixel.getPositionY()+pixelSizeOfRenderCanvas, pixel.getForOrBrackground(), pixel.getColor());
 			}
 		}
 		deleteAll();
@@ -741,6 +730,92 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 
 
 	
+
+	/******************MouseListener*****************************/
+	@Override
+	public void mouseClicked(MouseEvent e) {}
+
+	/**
+	 * Al pinchar posicionamos la x e y en la posición correcta
+	 */
+	@Override
+	public void mousePressed(MouseEvent e) {
+		Point point=e.getPoint();
+		float positionX=point.x;
+		float positionY=point.y;
+		//System.out.println(" x: "+positionX+" y: "+positionY);
+		//esto es para obtener un n�mero entero
+		float positionXRelocated=(point.x/pixelSizeOfRenderCanvas)*pixelSizeOfRenderCanvas;
+		float positionYRelocated=(point.y/pixelSizeOfRenderCanvas)*pixelSizeOfRenderCanvas;
+		//System.out.println(" x recoloado: "+positionXRelocated+" y recolocado: "+positionYRelocated);
+		if( positionX<maxWidth && positionY<maxHeight) {
+			if(e.getButton()==MouseEvent.BUTTON1) {
+				clickedButton1=true;
+				//Si est� seleccionado el bote de pintura llamos al m�todo que rellena los pixeles
+				if(paintBot) {
+					paintPotPixels((int)positionXRelocated,(int)positionYRelocated);
+				}else {
+					if(selectedClear) {
+						paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)2);
+					}else {
+						paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)0);
+					}
+				}	
+			}else if(e.getButton()==MouseEvent.BUTTON3) {
+				clickedButton3=true;
+				paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)1);
+			}
+		}else {
+			//System.out.println("No se pudo: x: "+positionX+", y:"+positionY+", maxWidth: "+maxWidth+", mazHeight: "+maxHeight);
+		}
+	}
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		clickedButton1=false;
+		clickedButton3=false;
+		fillTextAreaDefinitionAndColor();
+	}
+	@Override
+	public void mouseEntered(MouseEvent e) {}
+	@Override
+	public void mouseExited(MouseEvent e) {}
+	/******************End MouseListener*****************************/
+
+	/******************MouseMotionListener*****************************/
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		Point point=e.getPoint();
+		float positionX=point.x;
+		float positionY=point.y;
+		//System.out.println(" x: "+positionX+" y: "+positionY);
+		//esto es para obtener un n�mero entero
+		float positionXRelocated=(point.x/pixelSizeOfRenderCanvas)*pixelSizeOfRenderCanvas;
+		float positionYRelocated=(point.y/pixelSizeOfRenderCanvas)*pixelSizeOfRenderCanvas;
+		//System.out.println(" x recoloado: "+positionXRelocated+" y recolocado: "+positionYRelocated);
+		if(  positionXRelocated>=0 && positionXRelocated<maxWidth-borderX && positionYRelocated>=0 && positionYRelocated<maxHeight-borderY) {
+			if(clickedButton1) {
+				//Si est� seleccionado el bote de pintura llamos al m�todo que rellena los pixeles
+				if(paintBot) {
+					paintPotPixels((int)positionXRelocated,(int)positionYRelocated);
+				}else {
+					if(selectedClear) {
+						paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)2);
+					}else {
+					    paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)0);	
+					}
+				}	
+			}else if(clickedButton3) {
+				paintPixelAtPoint((int)positionXRelocated,(int)positionYRelocated,(byte)1);
+			}
+		}else {
+			//System.out.println("No se pudo: x: "+positionX+", y:"+positionY+", maxWidth: "+maxWidth+", mazHeight: "+maxHeight);
+		}
+	}
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		//System.out.println("mousemoved dice: x: "+e.getX()+", y: "+e.getY());
+	}
+	/******************End MouseMotionListener*****************************/
 	
 
 

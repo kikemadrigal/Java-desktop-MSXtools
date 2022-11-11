@@ -11,6 +11,10 @@ public class Sprite implements Serializable {
 	private int x;
 	private int y;
 	private String name;
+	//type 8 sprite 8x8, type 16 sprites 16x16
+	private byte type;
+	//Seg�n el n�mero de colores nos dice que screen es, 1=screen 1, 2=screen 2,etc
+	private byte numColors;
 	private Pixel[][] pixels;
 	private String dataDefinition;
 	private String dataColors;
@@ -18,20 +22,20 @@ public class Sprite implements Serializable {
 	private Color[] colorButtons1;
 	
 	private BufferedImage bufferedImage;
-	public Sprite(int number, int x, int y, String name) {
+	public Sprite(int number, int x, int y, String name, byte type, byte numColors) {
 		super();
 		this.number = number;
 		this.x = x;
 		this.y = y;
 		this.name = name;
-		//this.jLabel=jLabel;
+		this.type=type;
 		this.pixels=new Pixel[16][16];
-		for(int file=0;file<pixels.length;file++) {
+		/*for(int file=0;file<pixels.length;file++) {
 			for(int column=0;column<pixels[0].length;column++) {
 				Pixel pixel=new Pixel((column*16)+120,(file*16)+120,(byte)2,new Color(239,252,254));
 				pixels[x][y]=pixel;
 			}
-		}
+		}*/
 		this.colorButtons0=new Color[16];
 		this.colorButtons1=new Color[16];
 	}
@@ -96,6 +100,20 @@ public class Sprite implements Serializable {
 	}
 	public void setColorButtons1(Color[] colorButtons1) {
 		this.colorButtons1 = colorButtons1;
+	}
+	
+	public byte getType() {
+		return type;
+	}
+	public void setType(byte type) {
+		this.type = type;
+	}
+	
+	public byte getNumColors() {
+		return numColors;
+	}
+	public void setNumColors(byte numColors) {
+		this.numColors = numColors;
 	}
 	@Override
 	public String toString() {

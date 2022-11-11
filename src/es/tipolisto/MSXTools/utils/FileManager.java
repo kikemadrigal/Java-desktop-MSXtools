@@ -1,5 +1,6 @@
 package es.tipolisto.MSXTools.utils;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -175,7 +176,7 @@ public class FileManager {
 	
 	
 	
-	public static void createdFileBasicDecimal(byte screen, byte spriteVideo, ArrayList<Sprite>arrayListSprites, boolean showMessahe) {
+	public static void createdSpritesFileBasicDecimal(byte screen, byte spriteVideo, ArrayList<Sprite>arrayListSprites, boolean showMessahe) {
 		ArrayList<String> arrayListString=new ArrayList<String>();
 		int numberLine=10200;
 		int objetcs=arrayListSprites.size()-1;
@@ -228,8 +229,8 @@ public class FileManager {
 		}
 		
 		for (Sprite sprite: arrayListSprites) {
-			arrayListString.add(numberLine+" rem data colors definitions sprite "+sprite.getNumber()+", name: "+sprite.getName());
 			 if(screen==5) {
+				arrayListString.add(numberLine+" rem data colors definitions sprite "+sprite.getNumber()+", name: "+sprite.getName());	
 				String dataColors=sprite.getDataColors();
 				String[] stringsColors=dataColors.split("\n");
 				for(String linea: stringsColors) {
@@ -239,8 +240,13 @@ public class FileManager {
 			}
 		}
 		for (Sprite sprite: arrayListSprites) {
+			arrayListString.add(numberLine+" rem data atrubutes sprite "+sprite.getNumber()+", name: "+sprite.getName());
+			
 			if(screen==2) {
-				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",(20*"+sprite.getNumber()+",100),2,"+sprite.getNumber());
+				Color[] colors=sprite.getColorButtons0();
+				Color color=colors[0];
+				int positionColor=PaletteManager.getPositionColorOnPalette(color);
+				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",(20*"+sprite.getNumber()+",100),"+positionColor+","+sprite.getNumber());
 			}else if(screen==5) {
 				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",(20*"+sprite.getNumber()+",100),,"+sprite.getNumber());
 			}
@@ -259,4 +265,127 @@ public class FileManager {
 		else
 			System.out.println("Created basic File");
 	}
+	
+	
+	public static void createdSpritesFileBinaryDecimal(byte screen, byte spriteVideo, ArrayList<Sprite> arrayListSprites) {
+		ArrayList<String> arrayListString=new ArrayList<String>();
+		arrayListString.add("\t\t output sprites.bin");
+		arrayListString.add("\tdb   #fe");
+		arrayListString.add("\tdw   INICIO ");
+		arrayListString.add("\tdw   FINAL");
+		arrayListString.add("\tdw   INICIO ");
+		arrayListString.add("\torg  #d000 ");
+		arrayListString.add("INICIO: ");
+		/*********************Estableciendo modo vídeo*******************************/
+		arrayListString.add("; Setup video mode");
+		if(screen==2) {
+			arrayListString.add("\tld a,2");
+		}else if(screen==5) {
+			arrayListString.add("\tld a,5");
+		}
+		arrayListString.add("\tcall #005F ; CHGMOD equ #005F, change mode video to screen 2 or 5 or ...");
+		/*********************Estableciendo modo tamaño sprites*******************************/
+		arrayListString.add("; Setup sprite size");
+		if(spriteVideo!=0) {
+			arrayListString.add("; Sprites no ampliados de 16x16");
+			arrayListString.add("\tld b,#e2");
+			arrayListString.add("\tld c,1");
+			arrayListString.add("\tcall #0047;WRTVDP equ #0047, escribe en los registros del VDP");
+		}else {
+			arrayListString.add(";sprites no ampliados de 8x8");
+		}
+		
+
+		/*********************DEFINICICIONES*******************************/
+		arrayListString.add("\tld hl, sprites_definition");
+		if(screen==2) {
+			arrayListString.add("\tld de, 14336 ;&h3800, base(14) en sc2");
+		}else if(screen==5) {
+			arrayListString.add("\tld de, 30720 ;&h7800, base(29) en sc5");
+		}	
+		arrayListString.add("\tld bc, 32*"+arrayListSprites.size());
+		arrayListString.add("\tcall  #005C; #005C=LDIRVM ");
+		/******************END DEFINICICIONES*******************************/
+		/**************************COLORS*******************************/
+		if(screen==5) {
+			arrayListString.add("\tld hl, sprites_colors");
+			arrayListString.add("\tld de, 29696 ;&h7400, en sc5");
+			arrayListString.add("\tld bc, 16*"+arrayListSprites.size());
+			arrayListString.add("\tcall  #005C; #005C=LDIRVM ");
+		}
+		/***********************END COLORS*******************************/
+		/**************************ATRIBUTES*******************************/
+		arrayListString.add("\tld hl, sprites_atributes");
+		if(screen==2) {	
+			arrayListString.add("\tld de, 6912 ;&h1b00, base(28) en sc5");
+			arrayListString.add("\tld bc, 4*"+arrayListSprites.size());
+		}else if(screen==5) {
+			arrayListString.add("\tld de, 30208 ;&h7600, base(28) en sc5");
+			arrayListString.add("\tld bc, 4*"+arrayListSprites.size());
+		}
+		arrayListString.add("\tcall  #005C; #005C=LDIRVM ");
+		/************************END ATRIBUTES*******************************/
+		
+		arrayListString.add(".bucle: ");
+		arrayListString.add("\tjr .bucle");
+		
+		arrayListString.add("sprites_definition:");
+		for (Sprite sprite: arrayListSprites) {
+			arrayListString.add(";Definition sprite "+sprite.getNumber()+", name: "+sprite.getName());
+			String dataDefinitions=sprite.getDataDefinition();
+			String[] stringsDefinitions=dataDefinitions.split("\n");
+			for(String linea: stringsDefinitions) {
+				arrayListString.add("\tdb "+linea);
+			}	
+		}
+		
+		arrayListString.add("sprites_colors: ");
+		for (Sprite sprite: arrayListSprites) {
+			arrayListString.add(";Data colors sprite "+sprite.getNumber()+", name: "+sprite.getName());
+			if(screen==5) {
+				String dataColors=sprite.getDataColors();
+				String[] stringsColors=dataColors.split("\n");
+				for(String linea: stringsColors) {
+					arrayListString.add("\tdb "+linea);
+				}
+			 }
+			
+		}
+		arrayListString.add("sprites_atributes: ");
+		for (Sprite sprite: arrayListSprites) {
+			arrayListString.add(";Data atributes sprite (y,x,patron,color) "+sprite.getNumber()+", name: "+sprite.getName());
+			if(screen==2) {
+				//y,x,number,color
+				arrayListString.add("\tdb "+192/2+","+sprite.getNumber()*20+","+sprite.getNumber()*4+",2");
+			}else if(screen==5) {
+				String dataColors=sprite.getDataColors();
+				String[] stringsColors=dataColors.split("\n");
+				for(String linea: stringsColors) {
+					arrayListString.add("\tdb "+192/2+","+sprite.getNumber()*20+","+sprite.getNumber()*4+", \" \"");
+				}
+			}
+		}
+
+		arrayListString.add("FINAL: ");
+		FileManager fileManager=new FileManager();
+		fileManager.writeFile(new File("sprites.asm"), arrayListString);
+		//Creamos el autoexec
+		ArrayList<String> arrayListStringAutoexec=new ArrayList<String>();
+		arrayListStringAutoexec.add("10 bload\"sprites.bin\",r");
+		fileManager.writeFile(new File("autoexec.bas"), arrayListStringAutoexec);
+		//Creamos el .bin
+		String cmdOpenSjasm = "tools\\sjasm\\sjasm.exe sprites.asm"; 
+		try {
+			Runtime.getRuntime().exec(cmdOpenSjasm);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println(e);
+		} 
+		//Copiamos el autoexec y el bin a la carpeta dsk de openMSX
+		
+		
+		JOptionPane.showMessageDialog(null, "Created binary File");
+	}
+	
 }

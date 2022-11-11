@@ -1,5 +1,6 @@
 package es.tipolisto.MSXTools.utils;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class StringManager {
@@ -122,6 +123,9 @@ public class StringManager {
 		
 	}
 	
+	public static String getExtensionOfString(String originFile) {
+		return originFile.substring(originFile.length()-3,originFile.length());
+	}
 
 
 }

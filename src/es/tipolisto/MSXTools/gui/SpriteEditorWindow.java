@@ -1,44 +1,28 @@
 package es.tipolisto.MSXTools.gui;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+
 
 import es.tipolisto.MSXTools.beans.Pixel;
 import es.tipolisto.MSXTools.beans.RGB;
 import es.tipolisto.MSXTools.beans.Sprite;
 import es.tipolisto.MSXTools.dialogs.AutoDismiss;
 import es.tipolisto.MSXTools.menus.MainMenuSpriteEditor;
-import es.tipolisto.MSXTools.utils.FileManager;
 import es.tipolisto.MSXTools.utils.MSXPalette;
 import es.tipolisto.MSXTools.utils.NumberManager;
-import es.tipolisto.MSXTools.utils.Palettes;
-import utils.ImageManager;
+import es.tipolisto.MSXTools.utils.PaletteManager;
 
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -47,30 +31,30 @@ import java.awt.Dimension;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
+
 
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextArea;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.JScrollPane;
-import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
+import javax.swing.Icon;
 
 public class SpriteEditorWindow extends JFrame  {
 
-
+	private static final long serialVersionUID = -5085349918068681072L;
 	private JPanel panel;
 	private PaneDrawableSpriteEditor canvas;
 	private JTextArea textAreaDefinition,textAreaColor;
-	private JLabel lblSpriteNumber,lblSpriteName;
+	private JLabel lblSpriteNumberOnCanvas,lblNumberSpriteRiboon,lblNameSpriteRiboon;
+	private JTextField jtFieldName;
 	private JLabel lbltextAreaColor;
 	private byte selectedColor;
 	//0 background, 1 foregrounf
@@ -79,7 +63,7 @@ public class SpriteEditorWindow extends JFrame  {
 	private JButton[] jButtons0;
 	private JButton[] jButtons1;
 	private JButton btnSelectAllButtons0,btnSelectAllButtons1;
-	private HashMap<MSXPalette, RGB> palettePhilips8255NMS;
+	private JComboBox<String> comboBoxScreenInEditor,comboBoxTypeSpriteInEditor;
 
 	private boolean setAllColors0;
 	private boolean setAllColors1;
@@ -96,9 +80,13 @@ public class SpriteEditorWindow extends JFrame  {
 	private JScrollPane jscrollPanelImageSprites;
 	private Dimension dimensionJScrollPaneSprites;
 	private byte screenMode;
-
+	private boolean startAnimation;
+	//spriteType=8 sprites de 8x8, spriteType=16 sprites de 16x16px
+	private byte spriteType;
+	//spriteNUmColors=0 para screen 0, 1 para screen 1,etc
+	private byte spriteNumColorsOrScreenMode;
 	
-	public SpriteEditorWindow() {
+	public SpriteEditorWindow(byte spriteType, byte spriteNumColorsOrScreenMode) {
 		//Configuración del JFrame
 		setTitle("Sprite editor");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -113,10 +101,14 @@ public class SpriteEditorWindow extends JFrame  {
 		panel.setLayout(null);
 		setContentPane(panel);
 		
+
+		this.spriteType=spriteType;
+		this.spriteNumColorsOrScreenMode=spriteNumColorsOrScreenMode;
 		//La clase canvas (o donde se dibuja) trabaja con JButtons0, JButton1, TextAreaDefinition y TextAreaColor 
-		canvas = new PaneDrawableSpriteEditor(16, 16);
+		canvas = new PaneDrawableSpriteEditor(spriteType, spriteType);
 		panel.add(canvas);
 		
+		arrayListSprites=new ArrayList<Sprite>();
 		initComponents();
 	    
 		selectedColor=10;
@@ -126,14 +118,25 @@ public class SpriteEditorWindow extends JFrame  {
 		setAllColors1=false;
 		sustituteColors0=false;
 		sustituteColors1=false;
-		arrayListSprites=new ArrayList<Sprite>();
-		screenMode=5;
+		startAnimation=false;
+		//Ponemos los comboBox en el screen correspondiente
+		comboBoxScreenInEditor.setSelectedIndex(spriteNumColorsOrScreenMode);
+		//Ponemos el comboBox de sprite en 8x8 o 16x16
+		byte eightOrSixteenPixels=1;
+		switch (spriteType){
+		case 8:
+			eightOrSixteenPixels=0;
+			break;
+		case 16:
+			eightOrSixteenPixels=1;
+		}
+		comboBoxTypeSpriteInEditor.setSelectedIndex(eightOrSixteenPixels);
 		// Creamos el comportamiento de menú emergente
 		jPopupMenuSprite = new JPopupMenu();
 		
 		
 		riboon = new RiboonSpriteEditor(canvas,arrayListSprites,
-				lblSpriteNumber,lblSpriteName,
+				lblSpriteNumberOnCanvas,lblNumberSpriteRiboon,lblNameSpriteRiboon,jtFieldName,
 				textAreaDefinition,textAreaColor,
 				jButtons0,jButtons1);	
 
@@ -147,8 +150,7 @@ public class SpriteEditorWindow extends JFrame  {
 		
 		JCheckBox chckbxAutoSaved = new JCheckBox("  Auto saved");
 		chckbxAutoSaved.setBounds(740, 62, 109, 23);
-		chckbxAutoSaved.addActionListener(new ActionListener() {
-			
+		chckbxAutoSaved.addActionListener(new ActionListener() {	
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(chckbxAutoSaved.isSelected()) {
@@ -161,8 +163,14 @@ public class SpriteEditorWindow extends JFrame  {
 		});
 		panel.add(chckbxAutoSaved);
 				
-		menuBar = new MainMenuSpriteEditor(arrayListSprites, canvas, riboon, chckbxAutoSaved);
+		menuBar = new MainMenuSpriteEditor(arrayListSprites, canvas, riboon, chckbxAutoSaved, lblSpriteNumberOnCanvas,jtFieldName, comboBoxScreenInEditor, comboBoxTypeSpriteInEditor);
 		canvas.setMainMenuSpriteEditor(menuBar);
+		setJMenuBar(menuBar);
+		//Como empezamos en sc5 ponemos exportar a SC2 a false
+		menuBar.getJMenuExportSC2().setEnabled(false);
+
+
+		
 		//Ponemos que el color de frente amarillo
 		selectedColor=10;
 		setAllColorButtonsWithActiveColor((byte)0);
@@ -171,60 +179,8 @@ public class SpriteEditorWindow extends JFrame  {
 		setAllColorButtonsWithActiveColor((byte)1);
 		
 		
-		JLabel lblScreen = new JLabel("Screen");
-		lblScreen.setBounds(10, 62, 62, 23);
-		panel.add(lblScreen);
-		setJMenuBar(menuBar);
 		
-		
-		JComboBox comboBoxScreen = new JComboBox();
-		comboBoxScreen.setBounds(81, 63, 165, 22);
-		comboBoxScreen.setBackground(Color.WHITE);
-		comboBoxScreen.addItem("SC5");
-		comboBoxScreen.addItem("SC2");
-		comboBoxScreen.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(comboBoxScreen.getSelectedItem().equals("SC2")) {
-					screenMode=2;
-					textAreaColor.setVisible(false);
-					lbltextAreaColor.setVisible(false);
-					canvas.deleteAll();
-					setAllColorButtonsWithActiveColor((byte)0);
-				}else if(comboBoxScreen.getSelectedItem().equals("SC5")) {
-					screenMode=5;
-					textAreaColor.setVisible(true);
-					lbltextAreaColor.setVisible(true);
-					canvas.deleteAll();
-				}	
-			}
-		});
-		panel.add(comboBoxScreen);
-		
-		JComboBox comboBoxSpriteSize = new JComboBox();
-		comboBoxSpriteSize.setBounds(383, 63, 124, 22);
-		comboBoxSpriteSize.setBackground(Color.WHITE);
-		comboBoxSpriteSize.addItem("16x16 pixels");
-		comboBoxSpriteSize.addItem("8x8 pixels");
-		comboBoxSpriteSize.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "WIP");
-				/*canvas.deleteAll();
-				setAllColorButtonsWithActiveColor((byte)0);
-				if(comboBoxScreen.getSelectedItem().equals("8x8 pixels")) {
-					canvas = new PaneDrawableSpriteEditor(8, 8);
-				}else if(comboBoxScreen.getSelectedItem().equals("16x16 pixels")) {
-					canvas = new PaneDrawableSpriteEditor(16, 16);
-				}	
-				panel.add(canvas);*/
-			}
-		});
-		panel.add(comboBoxSpriteSize);
-		
-		JLabel lblSpriteSize = new JLabel("Sprite size");
-		lblSpriteSize.setBounds(272, 66, 95, 14);
-		panel.add(lblSpriteSize);
+
 		
 
 		
@@ -244,7 +200,7 @@ public class SpriteEditorWindow extends JFrame  {
 				//canvas.deleteAll();
 			  AutoDismiss.showMessageDialog(null, "Sprite editor", "MSX Spain 2022", 100);
 			  canvas.deleteAll();
-			  canvas.fillTextAreaDefinitionAndColot();
+			  canvas.fillTextAreaDefinitionAndColor();
 		  }
 		});
 	
@@ -253,9 +209,10 @@ public class SpriteEditorWindow extends JFrame  {
 	
 	
 	private void createSprite() {
+		int positionSprite=arrayListSprites.size();
 		//1.Creamos el sprite
 		// Sprite(int number, int x, int y, String name)
-		Sprite sprite = new Sprite(arrayListSprites.size(), 0, 0, "No_name" + arrayListSprites.size());	
+		Sprite sprite = new Sprite(positionSprite, 0, 0, "No_name" +positionSprite,spriteType, spriteNumColorsOrScreenMode);	
 		//2Le metemos los textAreas
 		sprite.setDataDefinition(textAreaDefinition.getText());
 		sprite.setDataColors(textAreaColor.getText());
@@ -286,22 +243,28 @@ public class SpriteEditorWindow extends JFrame  {
 			}
 		}
 		sprite.setPixels(pixelsSprite);
-		
-		//7.Ponemos el nombre y el número
-		sprite.setNumber(arrayListSprites.size());
-		lblSpriteNumber.setText(String.valueOf(sprite.getNumber()));
-		if(lblSpriteName.getText().isEmpty() ||lblSpriteName.getText().equals("") || lblSpriteName.getText().length()==0 ) {
-			sprite.setName("Sprite_name"+sprite.getNumber());
-			lblSpriteName.setText("No_name"+sprite.getNumber());
+		//le asignamos el screen y el tipo (8x8 o 16x16)
+		sprite.setType(spriteType);
+		sprite.setNumColors(spriteNumColorsOrScreenMode);
+		//5.Ponemos el nombre y el número
+		sprite.setNumber(positionSprite);
+		lblSpriteNumberOnCanvas.setText(String.valueOf(sprite.getNumber()));
+		sprite.setName("Sprite-"+sprite.getNumber());
+		String textFromTextField=jtFieldName.getText();
+		//Si no está vacío y no tiene el texto por defecto
+		if (!textFromTextField.isEmpty() && !textFromTextField.matches("^Sprite-[0-100]$")) {
+			sprite.setName(jtFieldName.getText());
+		}else {
+			jtFieldName.setText("Sprite-"+sprite.getNumber());
 		}
-		else {
-			sprite.setName("Sprite_name"+String.valueOf(sprite.getNumber()));
-			lblSpriteName.setText("No_name"+String.valueOf(sprite.getNumber()));
-		}
-		//5.Lo añadimos a la lista el JFrame
+		//7.Lo añadimos a la lista el JFrame
 		arrayListSprites.add(sprite);
-		//6.Actualizamos el rrboon para verlo
+		//8.Creamos el botón del ribbon
 		riboon.updateRiboon(sprite);
+		//9.Actualizamos el riboon para verlo, lo seleccionamos y ponemos el borde
+		riboon.updateBorders(sprite);
+		//10 selo metemos al canvas, como el que se está dubjando
+		canvas.setSpriteOnCanvasSelected(sprite);
 	}
 	private void updateSprite(Sprite sprite) {
 		//1. Le metemos los textAreas
@@ -337,26 +300,23 @@ public class SpriteEditorWindow extends JFrame  {
 		
 		//4.Ponemos el nombre y el número
 		sprite.setNumber(sprite.getNumber());
-		lblSpriteNumber.setText(String.valueOf(sprite.getNumber()));
-		if(lblSpriteName.getText().isEmpty() ||lblSpriteName.getText().equals("") || lblSpriteName.getText().length()==0 ) {
+		lblSpriteNumberOnCanvas.setText(String.valueOf(sprite.getNumber()));
+		if(jtFieldName.getText().isEmpty()) {
 			sprite.setName("Sprite_name"+sprite.getNumber());
-			lblSpriteName.setText("No_name"+sprite.getNumber());
+			jtFieldName.setText("No_name"+sprite.getNumber());
 		}
 		else {
-			sprite.setName("Sprite_name"+String.valueOf(sprite.getNumber()));
-			lblSpriteName.setText("No_name"+String.valueOf(sprite.getNumber()));
+			sprite.setName(jtFieldName.getText());
 		}
 		//5.Lo actualizamos en la lista del jframe
 		arrayListSprites.remove(sprite.getNumber());
 		arrayListSprites.add(sprite.getNumber(),sprite);
-		//6.Actualizamos el rrboon para verlo
-		riboon.updateRiboon(sprite);
 	}
 	
 	
 	
 	private void changeColorButton() {
-		palettePhilips8255NMS=Palettes.getPalettePhilips8255NMSForSprites();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMSForSprites();
 		//Determinamos si vamos a leer los botones de back o foreground - 0 es background
 		if(foreOrBackGround==0) {
 			for(int i=0;i<jButtons0.length;i++) {
@@ -416,57 +376,38 @@ public class SpriteEditorWindow extends JFrame  {
 	}
 	
 	private Color getActiveColor() {
-		palettePhilips8255NMS=Palettes.getPalettePhilips8255NMSForSprites();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMSForSprites();
 		Color colorSelected=new Color(0,0,0);
 		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
 			if(entry.getKey().ordinal()==selectedColor) {
 				if(entry.getKey().ordinal()==0) {
 					colorSelected=colorFondo;
 				}else {
-				//System.out.println("foreground "+foreOrBackGround+" file: "+fileColor+" selected: "+selectedColor);
-				colorSelected=new Color(entry.getValue().getRed(),entry.getValue().getGreen(),entry.getValue().getBlue());
+					//System.out.println("foreground "+foreOrBackGround+" file: "+fileColor+" selected: "+selectedColor);
+					colorSelected=new Color(entry.getValue().getRed(),entry.getValue().getGreen(),entry.getValue().getBlue());
 				}
 			}
 		}
 		return colorSelected;
 	}
 	
-	private Color getColorFromPallete(int number) {
-		palettePhilips8255NMS=Palettes.getPalettePhilips8255NMSForSprites();
-		Color colorSelected=new Color(0,0,0);
-		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
-			if(entry.getKey().ordinal()==number) {
-				colorSelected=new Color(entry.getValue().getRed(),entry.getValue().getGreen(),entry.getValue().getBlue());
-			}
-		}
-		return colorSelected;	
-	}
+
 	
-	private int getPositionColorOnPalette(Color color) {
-		palettePhilips8255NMS=Palettes.getPalettePhilips8255NMSForSprites();
-		int number=0;
-		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
-			RGB rgbItem=entry.getValue();
-			if(rgbItem.getRed()==color.getRed() && rgbItem.getBlue()==color.getBlue() && rgbItem.getGreen()==color.getGreen()) {
-				number=entry.getKey().ordinal();
-			}
-		}
-		return number;
-	}
+
 	
 	
 	private void substituteColors(byte fileCount,byte foreOrBackGround ) {
 		//System.out.println("sustituteColors dice color recibido: "+fileCount+", fOb: "+foreOrBackGround);
 		Pixel[][] pixels;
 		pixels=canvas.getPixels();
-		int sizeTile=canvas.getSizeTile();
+		int sizeTile=canvas.getPixelSizeOfRenderCanvas();
 		int borderX=canvas.getBorderX();
 		int borderY=canvas.getBorderY();
 		for(int y=0;y<pixels.length;y++) {
 			for(int x=0;x<pixels[0].length;x++) {
 				Pixel pixel=pixels[x][y];
 				Color color=pixel.getColor();
-				int positionColorOnPalette=getPositionColorOnPalette(color);
+				int positionColorOnPalette=PaletteManager.getPositionColorOnPalette(color);
 				String cadenaValorHexadecimal=NumberManager.decimalAHexadecimal(positionColorOnPalette);
 				byte frontOrBackgrounOnPixel=pixel.getForOrBrackground();
 				//Cambiamos los pixeles de la fila
@@ -480,7 +421,17 @@ public class SpriteEditorWindow extends JFrame  {
 		}
 	}
 	
+	private void changeNameSpriteCanvas() {
+		if(arrayListSprites.size()>0 ||arrayListSprites!=null ) {
+			for(int i=0;i<arrayListSprites.size();i++) {
+				if(canvas.getSpriteOnCanvasSelected().getNumber()==arrayListSprites.get(i).getNumber()) {
+					Sprite sprite=arrayListSprites.get(i);
+					sprite.setName(jtFieldName.getText());
+				}
+			}
+		}
 	
+	}
 	
 	
 	
@@ -574,7 +525,9 @@ public class SpriteEditorWindow extends JFrame  {
 		btnClearAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				canvas.deleteAll();
-				canvas.fillTextAreaDefinitionAndColot();
+				canvas.fillTextAreaDefinitionAndColor();
+				lblSpriteNumberOnCanvas.setText("");
+				jtFieldName.setText("");
 			}
 		});
 		btnClearAll.setBounds(135, 11, 40, 40);
@@ -593,7 +546,7 @@ public class SpriteEditorWindow extends JFrame  {
 		JPopupMenu jPopupMenuColors=new JPopupMenu();
 		for(int i=0;i<16;i++) {
 			JMenuItem menuColor=new JMenuItem(""+i);
-			menuColor.setBackground(getColorFromPallete(i));
+			menuColor.setBackground(PaletteManager.getColorFromPallete(i));
 			jPopupMenuColors.add(menuColor);
 			final byte count=(byte)i;
 			menuColor.addActionListener(new ActionListener() {
@@ -615,22 +568,22 @@ public class SpriteEditorWindow extends JFrame  {
 					//Esto significa que hemos pinchado en uno de los botones del menú
 					//y queremos cambiar los pixeles de una fila
 					if(sustituteColors0) {
-						if(screenMode==5) {
+						if(spriteNumColorsOrScreenMode==5) {
 							substituteColors(fileColor,(byte)0);
 							sustituteColors0=false;
-						}else {
+						}/*else {
 							JOptionPane.showMessageDialog(null, "Change the screen mode");
-						}
+						}*/
 
 					}else if(sustituteColors1) {
-						if(screenMode==5) {
+						if(spriteNumColorsOrScreenMode==5) {
 							substituteColors(fileColor,(byte)1);
 							sustituteColors1=false;
-						}else {
+						}/*else {
 							JOptionPane.showMessageDialog(null, "Change the screen mode");
-						}
+						}*/
 					}
-					canvas.fillTextAreaDefinitionAndColot();
+					canvas.fillTextAreaDefinitionAndColor();
 				}
 			});
 		}
@@ -647,15 +600,15 @@ public class SpriteEditorWindow extends JFrame  {
 		jButtons0=new JButton[16];
 		for(int i=0;i<jButtons0.length;i++) {
 			JButton jButton=new JButton("");
-			jButton.setBounds(10, 120+(i*20), 40, 20);
+			jButton.setBounds(50, 120+(i*20), 40, 20);
 			panel.add(jButton);
 			final byte count=(byte)i;
 			jButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if(screenMode==5) {
+					if(spriteNumColorsOrScreenMode==5) {
 						foreOrBackGround=0;
 						fileColor=count;
-						jPopupMenuColors.show(jButton,jButton.getX()/canvas.getSizeTile(), jButton.getY()/canvas.getSizeTile());
+						jPopupMenuColors.show(jButton,jButton.getX()/canvas.getPixelSizeOfRenderCanvas(), jButton.getY()/canvas.getPixelSizeOfRenderCanvas());
 						sustituteColors0=true;
 					}
 				}
@@ -672,11 +625,11 @@ public class SpriteEditorWindow extends JFrame  {
 			final byte count=(byte)i;
 			jButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if(screenMode==5) {
+					if(spriteNumColorsOrScreenMode==5) {
 						//System.out.println("has pinchado en uno de los botones de la derecha");
 						foreOrBackGround=1;
 						fileColor=count;
-						jPopupMenuColors.show(jButton,jButton.getX()/canvas.getSizeTile(), jButton.getY()/canvas.getSizeTile());
+						jPopupMenuColors.show(jButton,jButton.getX()/canvas.getPixelSizeOfRenderCanvas(), jButton.getY()/canvas.getPixelSizeOfRenderCanvas());
 						sustituteColors1=true;
 					}
 				}
@@ -699,18 +652,18 @@ public class SpriteEditorWindow extends JFrame  {
 		btnSelectAllButtons0 = new JButton("");
 		btnSelectAllButtons0.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				jPopupMenuColors.show(btnSelectAllButtons0,btnSelectAllButtons0.getX()/canvas.getSizeTile(), btnSelectAllButtons0.getY()/canvas.getSizeTile());
+				jPopupMenuColors.show(btnSelectAllButtons0,btnSelectAllButtons0.getX()/canvas.getPixelSizeOfRenderCanvas(), btnSelectAllButtons0.getY()/canvas.getPixelSizeOfRenderCanvas());
 				setAllColors0=true;
 			}
 		});
-		btnSelectAllButtons0.setBounds(10, 90, 40, 20);
+		btnSelectAllButtons0.setBounds(50, 90, 40, 20);
 		panel.add(btnSelectAllButtons0);
 		
 		btnSelectAllButtons1 = new JButton("");
 		btnSelectAllButtons1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//setAllColorButtonsWithActiveColor((byte)1);
-				jPopupMenuColors.show(btnSelectAllButtons1,btnSelectAllButtons1.getX()/canvas.getSizeTile(), btnSelectAllButtons1.getY()/canvas.getSizeTile());
+				jPopupMenuColors.show(btnSelectAllButtons1,btnSelectAllButtons1.getX()/canvas.getPixelSizeOfRenderCanvas(), btnSelectAllButtons1.getY()/canvas.getPixelSizeOfRenderCanvas());
 				setAllColors1=true;
 			}
 		});
@@ -730,24 +683,33 @@ public class SpriteEditorWindow extends JFrame  {
 		lblNextToNumberSprite.setBounds(119, 96, 46, 14);
 		panel.add(lblNextToNumberSprite);
 		
-		lblSpriteNumber = new JLabel("");
-		lblSpriteNumber.setFont(new Font("Tahoma", Font.BOLD, 14));
-		//lblSpriteNumber.setBackground(null);
-		lblSpriteNumber.setBounds(175, 96, 62, 14);
-		lblSpriteNumber.setOpaque(true);
-		panel.add(lblSpriteNumber);
+		lblSpriteNumberOnCanvas = new JLabel("");
+		lblSpriteNumberOnCanvas.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblSpriteNumberOnCanvas.setBounds(175, 96, 62, 14);
+		lblSpriteNumberOnCanvas.setOpaque(true);
+		panel.add(lblSpriteNumberOnCanvas);
 
 		
 		JLabel lblNextToNameSprite = new JLabel("Name:");
 		lblNextToNameSprite.setBounds(247, 96, 46, 14);
 		panel.add(lblNextToNameSprite);
 		
-		lblSpriteName = new JLabel("");
-		lblSpriteName.setFont(new Font("Tahoma", Font.BOLD, 14));
+		jtFieldName = new JTextField("");
+		jtFieldName.setFont(new Font("Tahoma", Font.BOLD, 14));
 		//lblSpriteName.setBackground(null);
-		lblSpriteName.setBounds(303, 96, 131, 14);
-		lblSpriteName.setOpaque(true);
-		panel.add(lblSpriteName);
+		jtFieldName.setBounds(303, 90, 131, 24);
+		jtFieldName.setOpaque(true);
+		/*jtFieldName.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void removeUpdate(DocumentEvent e) {}
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				//changeNameSpriteCanvas();	
+			}
+			@Override
+			public void changedUpdate(DocumentEvent e) {}
+		});*/
+		panel.add(jtFieldName);
 		/**
 		 * END LABELS SPRITES
 		 */
@@ -756,6 +718,26 @@ public class SpriteEditorWindow extends JFrame  {
 		/**
 		 * BUTTONS FOR SPRITES EDITING
 		 */
+		JButton btnWalking = new JButton(new ImageIcon("data\\andando.png"));
+		btnWalking.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!startAnimation) {
+					startAnimation=true;
+					btnWalking.setBackground(Color.YELLOW);
+					startAnimation();
+				}	
+				else {
+					startAnimation=false;
+					btnWalking.setBackground(null);
+				}
+				
+			}
+		});
+		btnWalking.setBounds(10, 451, 40, 40);
+		panel.add(btnWalking);
+		
+		
+		
 		//Estos botones trabajan con la clase riboon
 		JButton btnSpriteAdd = new JButton(new ImageIcon("data\\agregar.png"));
 		btnSpriteAdd.addActionListener(new ActionListener() {
@@ -769,15 +751,25 @@ public class SpriteEditorWindow extends JFrame  {
 		JButton btnSpriteUpdate = new JButton(new ImageIcon("data\\actualizar.png"));
 		btnSpriteUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("El sprite selecionado es "+riboon.getSpriteSelected());
-				int numberSpriteSelected=riboon.getSpriteSelected().getNumber();
-				for(int i=0;i<arrayListSprites.size();i++) {
-					Sprite sprite=arrayListSprites.get(i);
-					if(sprite.getNumber()==numberSpriteSelected) {
-						//System.out.println("actualizado el  "+sprite.getNumber());
-						updateSprite(sprite);
+				//System.out.println("El sprite selecionado es "+riboon.getSpriteOnRiboonSelected());
+				if(canvas.getSpriteOnCanvasSelected()==null) {
+					JOptionPane.showMessageDialog(null, "2 clicks on the sprite");
+				}else {
+					int numberSpriteSelected=canvas.getSpriteOnCanvasSelected().getNumber();
+					for(int i=0;i<arrayListSprites.size();i++) {
+						Sprite sprite=arrayListSprites.get(i);
+						if(sprite.getNumber()==numberSpriteSelected) {
+							//La seleccionamos y ponemos el borde
+							//System.out.println("actualizado el  "+sprite.getNumber());
+							updateSprite(sprite);
+							//Actualizamos el riboon para verlo
+							riboon.updateRiboon(sprite);
+							riboon.updateAllRiboon();
+						}
 					}
 				}
+				
+				
 			}
 		});
 		btnSpriteUpdate.setBounds(185, 451, 40, 40);
@@ -790,7 +782,10 @@ public class SpriteEditorWindow extends JFrame  {
 			public void actionPerformed(ActionEvent e) {
 				riboon.moveSpriteLeftOnRiboon();
 				riboon.updateAllRiboon();
-				riboon.updateBorders(riboon.getSpriteSelected());
+				Sprite sprite=riboon.getSpriteOnRiboonSelected();
+				riboon.updateBorders(sprite);
+				lblNumberSpriteRiboon.setText(""+sprite.getNumber());
+				lblNameSpriteRiboon.setText(sprite.getName());
 			}
 		});
 		btnSpriteLeft.setBounds(247, 451, 40, 40);
@@ -802,12 +797,23 @@ public class SpriteEditorWindow extends JFrame  {
 			public void actionPerformed(ActionEvent e) {
 				riboon.moveSpriteRightOnRiboon();
 				riboon.updateAllRiboon();
-				riboon.updateBorders(riboon.getSpriteSelected());
+				Sprite sprite=riboon.getSpriteOnRiboonSelected();
+				riboon.updateBorders(sprite);
+				lblNumberSpriteRiboon.setText(""+sprite.getNumber());
+				lblNameSpriteRiboon.setText(sprite.getName());
 			}
 		});
-		btnSpriteRight.setBounds(316, 451, 40, 40);
+		btnSpriteRight.setBounds(311, 451, 40, 40);
 		panel.add(btnSpriteRight);
 		
+		JButton btnDeleteSprite = new JButton(new ImageIcon("data\\delete-sprite.png"));
+		btnDeleteSprite.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				riboon.deleteSprite(riboon.getSpriteOnRiboonSelected());
+			}
+		});
+		btnDeleteSprite.setBounds(820, 451, 40, 40);
+		panel.add(btnDeleteSprite);
 		
 		
 		
@@ -883,15 +889,138 @@ public class SpriteEditorWindow extends JFrame  {
 		});
 		btnMoverUnoAbajo.setBounds(808, 11, 40, 40);
 		panel.add(btnMoverUnoAbajo);
-		
-		
-		
+
+		/**
+		 * END SBUTTONS FOR SPRITES EDITING
+		 */
 		
 		
 		
 		/**
-		 * END SBUTTONS FOR SPRITES EDITING
+		 * COMBOBOX AND SPRITESIZE
 		 */
 
+		JLabel lblScreen = new JLabel("Screen");
+		lblScreen.setBounds(10, 62, 62, 23);
+		panel.add(lblScreen);
+
+		comboBoxScreenInEditor = new JComboBox<String>();
+		comboBoxScreenInEditor.setBounds(81, 63, 165, 22);
+		comboBoxScreenInEditor.setBackground(Color.WHITE);
+		comboBoxScreenInEditor.setBackground(Color.WHITE);
+		comboBoxScreenInEditor.addItem("SC0");
+		comboBoxScreenInEditor.addItem("SC1");
+		comboBoxScreenInEditor.addItem("SC2");
+		comboBoxScreenInEditor.addItem("SC3");
+		comboBoxScreenInEditor.addItem("SC4");
+		comboBoxScreenInEditor.addItem("SC5");
+		comboBoxScreenInEditor.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String selectedItem=(String)comboBoxScreenInEditor.getSelectedItem();
+				if(!selectedItem.equals("SC"+String.valueOf(spriteNumColorsOrScreenMode))) {
+					int confirm=JOptionPane.showConfirmDialog(null, "Are you sure you want to change?, the sprites will be deleted");
+					if (confirm==0) {
+						if(comboBoxScreenInEditor.getSelectedItem().equals("SC2")) {
+							spriteNumColorsOrScreenMode=2;
+							//System.out.println("Cambiado a sprite color screen "+spriteNumColorsOrScreenMode);
+							textAreaColor.setVisible(false);
+							lbltextAreaColor.setVisible(false);
+							selectedColor=10;
+							setAllColorButtonsWithActiveColor((byte)0);
+							menuBar.getJMenuExportSC2().setEnabled(true);
+							menuBar.getJMenuExportSC5().setEnabled(false);
+						}else if(comboBoxScreenInEditor.getSelectedItem().equals("SC5")) {
+							spriteNumColorsOrScreenMode=5;
+							//System.out.println("Cambiado a sprite color screen "+spriteNumColorsOrScreenMode);
+							textAreaColor.setVisible(true);
+							lbltextAreaColor.setVisible(true);	
+							selectedColor=10;
+							//Desabilitamos que se pueda exportar a sc2
+							menuBar.getJMenuExportSC2().setEnabled(false);
+							menuBar.getJMenuExportSC5().setEnabled(true);
+						}
+						menuBar.closeAll();
+					}
+				}
+			}
+		});
+		panel.add(comboBoxScreenInEditor);
+		
+		comboBoxTypeSpriteInEditor = new JComboBox();
+		comboBoxTypeSpriteInEditor.setBounds(383, 63, 124, 22);
+		comboBoxTypeSpriteInEditor.setBackground(Color.WHITE);
+		comboBoxTypeSpriteInEditor.addItem("8x8 pixels");
+		comboBoxTypeSpriteInEditor.addItem("16x16 pixels");
+		comboBoxTypeSpriteInEditor.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String selectedItem=(String)comboBoxTypeSpriteInEditor.getSelectedItem();
+				byte spriteSize=0;
+				switch (selectedItem){
+					case "8x8 pixels":
+						spriteSize=8;
+						break;
+					case "16x16 pixels":
+						spriteSize=16;
+				}
+				if(spriteSize!=spriteType) {
+					int confirm=JOptionPane.showConfirmDialog(null, "Are you sure you want to change?, the sprites will be deleted");
+					if (confirm==0) {
+						spriteType=spriteSize;
+						System.out.println("Cambiado a sprite tipo "+spriteType);
+						SpriteEditorWindow frame = new SpriteEditorWindow(spriteType,spriteNumColorsOrScreenMode);
+						frame.setVisible(true);			
+						setVisible(false);
+						dispose();
+						
+					}
+				}
+			}
+		});
+		panel.add(comboBoxTypeSpriteInEditor);
+		
+		JLabel lblSpriteSize = new JLabel("Sprite size");
+		lblSpriteSize.setBounds(272, 66, 95, 14);
+		panel.add(lblSpriteSize);
+		
+		
+		
+		lblNumberSpriteRiboon = new JLabel("");
+		lblNumberSpriteRiboon.setBounds(537, 477, 83, 14);
+		panel.add(lblNumberSpriteRiboon);
+		
+		lblNameSpriteRiboon = new JLabel("");
+		lblNameSpriteRiboon.setBounds(622, 477, 188, 14);
+		panel.add(lblNameSpriteRiboon);
+
 	}
+	
+	
+	private void startAnimation() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for(int i=0;i<arrayListSprites.size();i++) {
+					if(startAnimation) {
+						if(startAnimation==false)break;
+						try {
+							Thread.sleep(1000);
+							Sprite sprite=arrayListSprites.get(i);
+							riboon.showSpriteOnContentPane(sprite);
+							riboon.updateRiboon(sprite);
+							riboon.updateBorders(sprite);
+							canvas.setSpriteOnCanvasSelected(sprite);
+							if(sprite.getNumber()==arrayListSprites.size()-1) i=-1;
+						} catch (InterruptedException ex) {
+							// TODO Auto-generated catch block
+							ex.printStackTrace();
+						}
+					}	
+				}	
+			}
+		}).start();	
+	}
+	
+
 }

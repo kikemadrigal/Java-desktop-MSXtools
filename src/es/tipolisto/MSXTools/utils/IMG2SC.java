@@ -44,7 +44,7 @@ public class IMG2SC{
 	
 	
 	public BufferedImage associateColorsBMPWithPalette(BufferedImage bufferedImage, int similarDistance) {
-		HashMap<MSXPalette, RGB> palettePhilips8255NMS=Palettes.getPalettePhilips8255NMS();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMS();
         BufferedImage bufferedImageDestiny=new BufferedImage(256, 212, BufferedImage.TYPE_INT_RGB);
         //Como en el archivo.bmp o .jps o .png solo tenemos los bytes BB GG RR
         //vamos analizando pixel a pixel si es alguno de los que tenemos en nuetsra paleta
@@ -72,7 +72,7 @@ public class IMG2SC{
 		return bufferedImageDestiny;
 	}
 	public BufferedImage associateColorsPNGWithPalette(BufferedImage bufferedImage, int similarDistance) {
-		HashMap<MSXPalette, RGB> palettePhilips8255NMS=Palettes.getPalettePhilips8255NMS();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMS();
         BufferedImage bufferedImageDestiny=new BufferedImage(256, 212, BufferedImage.TYPE_INT_RGB);
         //Como en el archivo.bmp o .jps o .png solo tenemos los bytes BB GG RR
         //vamos analizando pixel a pixel si es alguno de los que tenemos en nuetsra paleta
@@ -106,7 +106,7 @@ public class IMG2SC{
 
 	public StringBuilder associateColorsBMPWithPaletteReturnStringSC5(BufferedImage bufferedImage, int similarDistance) {
 		StringBuilder sb=new StringBuilder();
-		HashMap<MSXPalette, RGB> palettePhilips8255NMS=Palettes.getPalettePhilips8255NMS();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMS();
         BufferedImage bufferedImageDestiny=new BufferedImage(256, 212, BufferedImage.TYPE_INT_RGB);
         //Como en el archivo.bmp o .jps o .png solo tenemos los bytes BB GG RR
         //vamos analizando pixel a pixel si es alguno de los que tenemos en nuetsra paleta
@@ -137,7 +137,7 @@ public class IMG2SC{
 	}
 	public StringBuilder associateColorsPNGWithPaletteReturnStringSC5(BufferedImage bufferedImage, int similarDistance) {
 		StringBuilder sb=new StringBuilder();
-		HashMap<MSXPalette, RGB> palettePhilips8255NMS=Palettes.getPalettePhilips8255NMS();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMS();
         String result="";
         BufferedImage bufferedImageDestiny=new BufferedImage(256, 212, BufferedImage.TYPE_INT_RGB);
         //Como en el archivo.bmp o .jps o .png solo tenemos los bytes BB GG RR
@@ -174,7 +174,7 @@ public class IMG2SC{
 
 
 	public BufferedImage getBufferedImage(File imageFile) {
-		HashMap<MSXPalette, RGB> palettePhilips8255NMS=Palettes.getPalettePhilips8255NMS2();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMS2();
 		//Creamos la via de comunicaci�n para poder leer la imagen
 		BufferedImage bufferedImage=null;
 		try {

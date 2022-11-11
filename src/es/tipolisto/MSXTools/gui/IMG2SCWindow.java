@@ -29,7 +29,7 @@ import es.tipolisto.MSXTools.beans.RGB;
 import es.tipolisto.MSXTools.utils.IMG2SC;
 import es.tipolisto.MSXTools.utils.MSXPalette;
 import es.tipolisto.MSXTools.utils.NumberManager;
-import es.tipolisto.MSXTools.utils.Palettes;
+import es.tipolisto.MSXTools.utils.PaletteManager;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -94,7 +94,7 @@ public class IMG2SCWindow extends JFrame {
 	public IMG2SCWindow() {
 		img2sc=new IMG2SC();
 		screen=5;
-		palettePhilips8255NMS=Palettes.getPalettePhilips8255NMS();
+		palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMS();
 		paletteSelect=0;
 		similarDistance=10000;
 		
@@ -881,7 +881,7 @@ public class IMG2SCWindow extends JFrame {
 	}
 	
 	private void resetPalette() {
-		RGB[] rgbRGB8255NMS=Palettes.getRGB8255NMS();
+		RGB[] rgbRGB8255NMS=PaletteManager.getRGB8255NMS();
 		int i=0;
 		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
 			switch(entry.getKey()) {

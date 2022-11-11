@@ -145,7 +145,8 @@ public class MainWindow extends JFrame {
 		JButton btnSpriteEditor = new JButton("Sprite editor");
 		btnSpriteEditor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				SpriteEditorWindow frame = new SpriteEditorWindow();
+				//Le decimos que empieza con sprites de 16x16 y screen 5
+				SpriteEditorWindow frame = new SpriteEditorWindow((byte)16,(byte)5);
 				frame.setVisible(true);				
 			}
 		});

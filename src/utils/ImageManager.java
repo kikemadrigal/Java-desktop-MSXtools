@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import es.tipolisto.MSXTools.beans.RGB;
 import es.tipolisto.MSXTools.utils.MSXPalette;
-import es.tipolisto.MSXTools.utils.Palettes;
+import es.tipolisto.MSXTools.utils.PaletteManager;
 
 public class ImageManager {
 	public ImageManager() {}
@@ -32,7 +32,7 @@ public class ImageManager {
 	
 	public static String getNameColor(Color color) {
 		String colorSelected="Notfound";
-		HashMap<MSXPalette, RGB> palettePhilips8255NMS=Palettes.getPalettePhilips8255NMS();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMS();
 		RGB rgbItem=new RGB(255,255,255);
 		Color deleteColor=new Color(239,252,254);
 		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
@@ -53,7 +53,7 @@ public class ImageManager {
 	
 	
 	public static int getPositionColorOnPalette(Color color) {
-		HashMap<MSXPalette, RGB> palettePhilips8255NMS=Palettes.getPalettePhilips8255NMSForSprites();
+		HashMap<MSXPalette, RGB> palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMSForSprites();
 		int number=0;
 		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
 			RGB rgbItem=entry.getValue();

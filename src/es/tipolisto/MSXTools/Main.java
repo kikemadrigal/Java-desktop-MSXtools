@@ -148,7 +148,7 @@ public class Main {
 							arrayListSprites.add(sprite);
 						}
 						objectInputputStream.close();
-						FileManager.createdFileBasicDecimal((byte)5,(byte)2, arrayListSprites, false);	
+						FileManager.createdSpritesFileBasicDecimal((byte)5,(byte)2, arrayListSprites, false);	
 					}catch(Exception ex) {
 						JOptionPane.showMessageDialog(null,  "Exception "+ex);
 					}
