@@ -108,6 +108,7 @@ public class IMG2SCWindow extends JFrame {
 		setResizable(false);
 		//Centramos la ventana en la pantalla
 		setLocationRelativeTo(null);
+		setIconImage(new ImageIcon("data\\icon.png").getImage());
 		
 		labelSelectedPathFile = new JLabel("Path origin file");
 		labelSelectedPathFile.setVerticalAlignment(SwingConstants.TOP);

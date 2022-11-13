@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 
 import java.awt.Font;
 import javax.swing.SwingConstants;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
@@ -47,6 +48,7 @@ public class DeleteComentsWindow extends JFrame {
 		contentPane.setLayout(null);
 		//Centramos la ventana en la pantalla
 		setLocationRelativeTo(null);
+		setIconImage(new ImageIcon("data\\icon.png").getImage());
 		
 		JLabel lblNewLabel = new JLabel("Delete comments");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);

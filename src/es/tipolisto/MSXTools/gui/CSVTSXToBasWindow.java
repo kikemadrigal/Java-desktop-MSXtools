@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -40,6 +41,7 @@ public class CSVTSXToBasWindow extends JFrame {
 		setTitle("MSX Murcia");
 		//Centramos la ventana en la pantalla
 		setLocationRelativeTo(null);
+		setIconImage(new ImageIcon("data\\icon.png").getImage());
 		
 		inicializar();
 		

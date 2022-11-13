@@ -16,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
@@ -54,6 +56,7 @@ public class CSVTSXToHexWindow extends JFrame {
 		contentPane.setLayout(null);
 		//Centramos la ventana en la pantalla
 		setLocationRelativeTo(null);
+		setIconImage(new ImageIcon("data\\icon.png").getImage());
 		
 		JLabel lblNewLabel = new JLabel("CSV / TMX to Hex");
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 17));

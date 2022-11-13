@@ -97,12 +97,14 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	public void drawLinesAndExes(Graphics g) {
 		//Graphics g=this.getGraphics();
 		Graphics2D g2 = (Graphics2D) g;
+		
 		g.setColor(Color.PINK);
         g2.setStroke(new BasicStroke(3));
         g2.draw(new Line2D.Float(0,((verticalTiles/2)*pixelSizeOfRenderCanvas),maxWidth, ((verticalTiles/2)*pixelSizeOfRenderCanvas)));
         g2.draw(new Line2D.Float(((horizontalTiles/2)*pixelSizeOfRenderCanvas),0,((horizontalTiles/2)*pixelSizeOfRenderCanvas), maxHeight));
         g2.setStroke(new BasicStroke(1));
 		g.setColor(Color.BLACK);
+		
 		//Dibujamos las lineas horizontales
 		for (int i=0;i<=pixelSizeOfRenderCanvas*horizontalTiles+1;i+=pixelSizeOfRenderCanvas) {
 			g.drawLine(0, i, pixelSizeOfRenderCanvas*horizontalTiles, i);
@@ -326,16 +328,8 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 
 	public void fillTextAreaDefinitionAndColor() {
 		if(horizontalTiles==8 && verticalTiles==8) {
-			String[] dataDefinition=getDataDefinition8x8pixels();
-			String stringDataDenition="";
-			for (int x=0;x<4;x++) {
-				for (int i=0;i<dataDefinition.length;i++) {
-					stringDataDenition+=dataDefinition[x]+",";
-				}
-				stringDataDenition+="\n";
-			}
-			textAreaDefinition.setText("WIP");
-			//0 convertir a decimal, 1 convertir a hexadecimal
+			String stringDataDenition=getDataDefinition8x8pixels();
+			textAreaDefinition.setText(stringDataDenition);
 			String[] definitionColors=getDataColors8x8Pixels((byte)0);
 			String definitionColor="";
 			for(int i=0;i<definitionColors.length;i++) {
@@ -345,7 +339,6 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 					definitionColor+=definitionColors[i]+",";
 			}
 			textAreaColor.setText(definitionColor);
-			
 		}else if(horizontalTiles==16 && verticalTiles==16) {
 			String[][] dataDefinition=getDataDefinition16x16pixels();
 			String stringDataDenition="";
@@ -369,9 +362,137 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 					definitionColor+=definitionColors[i]+",";
 			}
 			textAreaColor.setText(definitionColor);
+		}		
+	}
+	
+	
+	private String getDataDefinition8x8pixels() {
+		StringBuffer stringWithForeOrBackgrounds=new StringBuffer();
+		Pixel[][] pixels=getPixels();
+		String result="";
+		String[] rows=new String[8];
+		int rowPosition=0;
+		String cadenaFormateada="";
+		String cadenasFormateadas[];
+		//1. Sacamos los 0 y 1, un pixel tendrá el valor 0 si es el color de frente y un 1 si es el de fondo
+		//System.out.println("filas "+pixels.length+" ,columnas "+pixels[0].length);
+		for(int y=0;y<pixels.length;y++) {
+			for(int x=0;x<pixels[0].length;x++) {
+				Pixel pixel=pixels[x][y];
+				byte foreOrBackGround=pixel.getForOrBrackground();
+				stringWithForeOrBackgrounds.append(foreOrBackGround);
+			}
+		}
+		//2.Obtenemos los renglones
+
+
+		for(int i=0;i<stringWithForeOrBackgrounds.length()+1;i++) {
+			if(i>0 && i % 8==0) {
+				String valor=stringWithForeOrBackgrounds.substring(i-8, i);
+				rows[rowPosition]=valor;
+				rowPosition++;
+			}
+		}
+
+
+		//3 Vamos recorriendo las letras de los renglones buscando 0,1 y 2
+		for (int x=0;x<rows.length;x++) {
+			String cadenaSprite=rows[x];
+			for (int i=0;i<8;i++) {
+				char letra=cadenaSprite.charAt(i);
+				if(letra=='0') letra='1';
+				else if(letra=='1') letra='0';
+				else if(letra=='2') letra='0';
+				cadenaFormateada +=letra;
+			}			
+			cadenaFormateada+="\n";
 		}
 		
+		//4 Convertimos la cadena a otra con valores decimales
+		cadenasFormateadas=cadenaFormateada.split("\n");
+		for(int i=0;i<cadenasFormateadas.length;i++) {
+			String cadena=cadenasFormateadas[i];
+			int valorDecimal=NumberManager.getDecimal(Integer.valueOf(cadena));
+			result += String.valueOf(valorDecimal);
+			if(i!=cadenasFormateadas.length-1)result += ",";
+		}
+		return result;
+	}	
+	private String[][] getDataDefinition16x16pixels() {
+		StringBuffer cadena=new StringBuffer();
+		Pixel[][] pixels;
+		pixels=getPixels();
+		for(int y=0;y<pixels.length;y++) {
+			for(int x=0;x<pixels[0].length;x++) {
+				Pixel pixel=pixels[x][y];
+				byte foreOrBackGround=pixel.getForOrBrackground();
+				cadena.append(foreOrBackGround);
+			}
+		}
+		String[] arrayBytes=new String[16*2];
+		String[][] sprites=new String[4][8];
+		String[][] spritesBinary=new String[4][8];
+		byte position=0;
+		//El formato de color 1 divide el sprite de 16 pixeles en 4 partes
+		for(int i=0;i<cadena.length()+1;i++) {
+			if(i>0 && i % 8==0) {
+				String valor=cadena.substring(i-8, i);
+				arrayBytes[position]=valor;
+				position++;
+			}
+			
+		}
+
+		//Los numeros pares formarán parte del 1 y 3 sprites
+		int count0=0;
+		int count1=0;
+		int count2=0;
+		int count3=0;
+		for(int i=0;i<arrayBytes.length;i++) {
+			//System.out.println("i:"+i+", "+arrayBytes[i]);
+			if(i % 2==0) {
+				if (i<16) {
+					sprites[0][count0]=arrayBytes[i];
+					count0++;
+				}else if(i>=16 && i<32) {
+					sprites[1][count1]=arrayBytes[i];
+					count1++;
+				}
+			}else {
+				if (i<16) {
+					sprites[2][count2]=arrayBytes[i];
+					count2++;
+				}else if(i>=16 && i<32) {
+					sprites[3][count3]=arrayBytes[i];
+					count3++;
+				}
+			}	
+		}
+		
+		//Paranoia
+		for (int x=0;x<4;x++) {
+			//System.out.println("Sprite: "+x);
+			for (int i=0;i<sprites[x].length;i++) {
+				String cadenaSprite=sprites[x][i];
+				cadenaSprite=cadenaSprite.replace("0","1");
+				cadenaSprite=cadenaSprite.replace("2","0");
+				int binary=NumberManager.getDecimal(Integer.valueOf(cadenaSprite));
+				//String binaryToHexadecimal=NumberManager.decimalAHexadecimal(binary);
+				spritesBinary[x][i]=String.valueOf(binary);
+				sprites[x][i]=cadenaSprite;
+			}
+		}
+		return spritesBinary;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	private String[] getDataColors8x8Pixels(byte mode) {
 		String[] arrayDefinitionColors=new String[8];
 		//El caracter de la izquierda es el color de fondo, el de la dereecha es el de frente
@@ -454,95 +575,7 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	}
 	
 	
-	private String[] getDataDefinition8x8pixels() {
-		StringBuffer cadena=new StringBuffer();
-		Pixel[][] pixels;
-		pixels=getPixels();
-
-		for(int y=0;y<pixels.length;y++) {
-			for(int x=0;x<pixels[0].length;x++) {
-				Pixel pixel=pixels[x][y];
-				byte foreOrBackGround=pixel.getForOrBrackground();
-				cadena.append(foreOrBackGround);
-			}
-		}
-		
-		String[] arrayBytes=new String[16];
-		
-		return arrayBytes;
-	}
-
 	
-	
-	
-	private String[][] getDataDefinition16x16pixels() {
-		StringBuffer cadena=new StringBuffer();
-		Pixel[][] pixels;
-		pixels=getPixels();
-
-		for(int y=0;y<pixels.length;y++) {
-			for(int x=0;x<pixels[0].length;x++) {
-				Pixel pixel=pixels[x][y];
-				byte foreOrBackGround=pixel.getForOrBrackground();
-				cadena.append(foreOrBackGround);
-			}
-		}
-		
-		String[] arrayBytes=new String[16*2];
-		String[][] sprites=new String[4][8];
-		String[][] spritesBinary=new String[4][8];
-		byte position=0;
-		//El formato de color 1 divide el sprite de 16 pixeles en 4 partes
-		for(int i=0;i<cadena.length()+1;i++) {
-			if(i>0 && i % 8==0) {
-				String valor=cadena.substring(i-8, i);
-				arrayBytes[position]=valor;
-				position++;
-			}
-			
-		}
-
-		//Los numeros pares formarán parte del 1 y 3 sprites
-		int count0=0;
-		int count1=0;
-		int count2=0;
-		int count3=0;
-		for(int i=0;i<arrayBytes.length;i++) {
-			//System.out.println("i:"+i+", "+arrayBytes[i]);
-			if(i % 2==0) {
-				if (i<16) {
-					sprites[0][count0]=arrayBytes[i];
-					count0++;
-				}else if(i>=16 && i<32) {
-					sprites[1][count1]=arrayBytes[i];
-					count1++;
-				}
-			}else {
-				if (i<16) {
-					sprites[2][count2]=arrayBytes[i];
-					count2++;
-				}else if(i>=16 && i<32) {
-					sprites[3][count3]=arrayBytes[i];
-					count3++;
-				}
-			}	
-		}
-		
-		//Paranoia
-		for (int x=0;x<4;x++) {
-			//System.out.println("Sprite: "+x);
-			for (int i=0;i<sprites[x].length;i++) {
-				String cadenaSprite=sprites[x][i];
-				cadenaSprite=cadenaSprite.replace("0","1");
-				cadenaSprite=cadenaSprite.replace("2","0");
-				int binary=NumberManager.getDecimal(Integer.valueOf(cadenaSprite));
-				//String binaryToHexadecimal=NumberManager.decimalAHexadecimal(binary);
-				spritesBinary[x][i]=String.valueOf(binary);
-				sprites[x][i]=cadenaSprite;
-			}
-		}
-		return spritesBinary;
-	}
 
 	
 	
@@ -599,7 +632,7 @@ public class PaneDrawableSpriteEditor extends Canvas implements MouseListener, M
 	}
 
 	//Girrar a la izquierda
-	public void turnLeft() {
+	public void diagonal() {
 		Pixel[][] pixels=getPixels();
 		Pixel[][] pixelsHelp=new Pixel[horizontalTiles][verticalTiles];
 		for(int y=0;y<pixels.length;y++) {

@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -176,15 +175,23 @@ public class FileManager {
 	
 	
 	
-	public static void createdSpritesFileBasicDecimal(byte screen, byte spriteVideo, ArrayList<Sprite>arrayListSprites, boolean showMessahe) {
+	public static void createdSpritesFileBasicDecimal(byte screen, byte spriteType, ArrayList<Sprite>arrayListSprites, boolean audmented, boolean showMessahe) {
 		ArrayList<String> arrayListString=new ArrayList<String>();
+		byte spriteVideo=0;
+		if(spriteType==8 && audmented==false) spriteVideo=0;
+		else if(spriteType==8 && audmented==true) spriteVideo=1;
+		else if(spriteType==16 && audmented==false) spriteVideo=2;
+		else if(spriteType==16 && audmented==true) spriteVideo=3;
 		int numberLine=10200;
 		int objetcs=arrayListSprites.size()-1;
 		arrayListString.add(numberLine+" screen "+screen+","+spriteVideo);
 		numberLine+=10;
 		arrayListString.add(numberLine+" for i=0 to "+objetcs+":sp$=\"\"");
 		numberLine+=10;
-		arrayListString.add("\t"+numberLine+" for j=0 to 31");
+		if(spriteType==8)
+			arrayListString.add("\t"+numberLine+" for j=0 to 7");
+		if(spriteType==16)
+			arrayListString.add("\t"+numberLine+" for j=0 to 31");
 		numberLine+=10;
 		arrayListString.add("\t\t"+numberLine+" read a$");
 		numberLine+=10;
@@ -197,10 +204,13 @@ public class FileManager {
 		arrayListString.add(numberLine+" next i");
 		numberLine+=10;
 		
-		if(screen==5) {
+		if(screen==4 || screen==5) {
 			arrayListString.add(numberLine+" for i=0 to "+objetcs+":sp$=\"\"");
 			numberLine+=10;
-			arrayListString.add("\t"+numberLine+" for j=0 to 15");
+			if(spriteType==8)
+				arrayListString.add("\t"+numberLine+" for j=0 to 7");
+			else if(spriteType==16)
+				arrayListString.add("\t"+numberLine+" for j=0 to 15");
 			numberLine+=10;
 			arrayListString.add("\t\t"+numberLine+" read a$");
 			numberLine+=10;
@@ -217,9 +227,9 @@ public class FileManager {
 
 		arrayListString.add(numberLine+" rem sprites data definitions");
 		numberLine+=10;
-		
 		for (Sprite sprite: arrayListSprites) {
 			arrayListString.add(numberLine+" rem data definition sprite "+sprite.getNumber()+", name: "+sprite.getName());
+			numberLine+=10;
 			String dataDefinitions=sprite.getDataDefinition();
 			String[] stringsDefinitions=dataDefinitions.split("\n");
 			for(String linea: stringsDefinitions) {
@@ -229,7 +239,7 @@ public class FileManager {
 		}
 		
 		for (Sprite sprite: arrayListSprites) {
-			 if(screen==5) {
+			 if(screen==4 ||screen==5) {
 				arrayListString.add(numberLine+" rem data colors definitions sprite "+sprite.getNumber()+", name: "+sprite.getName());	
 				String dataColors=sprite.getDataColors();
 				String[] stringsColors=dataColors.split("\n");
@@ -239,17 +249,32 @@ public class FileManager {
 				}
 			}
 		}
+		int file=0;
+		int column=1;
 		for (Sprite sprite: arrayListSprites) {
 			arrayListString.add(numberLine+" rem data atrubutes sprite "+sprite.getNumber()+", name: "+sprite.getName());
+			numberLine+=10;
 			
-			if(screen==2) {
+			/*if(sprite.getNumber() !=0 && sprite.getNumber() % 7==0) {
+				file+=33;
+			}*/
+			if(screen==1 || screen==2 || screen==3) {
+				if(column>=33*4) {
+					column=0;
+					file+=33;
+				}
 				Color[] colors=sprite.getColorButtons0();
 				Color color=colors[0];
 				int positionColor=PaletteManager.getPositionColorOnPalette(color);
-				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",(20*"+sprite.getNumber()+",100),"+positionColor+","+sprite.getNumber());
-			}else if(screen==5) {
-				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",(20*"+sprite.getNumber()+",100),,"+sprite.getNumber());
+				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",("+column+","+file+"),"+positionColor+","+sprite.getNumber());
+			}else if(screen==4 || screen==5) {
+				if(column>=33*7) {
+					column=0;
+					file+=33;
+				}
+				arrayListString.add(numberLine+" put sprite "+sprite.getNumber()+",("+column+","+file+"),,"+sprite.getNumber());
 			}
+			column+=33;
 			numberLine+=10;
 		}
 		arrayListString.add(numberLine+" goto "+numberLine);
@@ -267,7 +292,7 @@ public class FileManager {
 	}
 	
 	
-	public static void createdSpritesFileBinaryDecimal(byte screen, byte spriteVideo, ArrayList<Sprite> arrayListSprites) {
+	public static void createdSpritesFileBinaryDecimal(byte screen, byte spriteType, ArrayList<Sprite> arrayListSprites, boolean audmented) {
 		ArrayList<String> arrayListString=new ArrayList<String>();
 		arrayListString.add("\t\t output sprites.bin");
 		arrayListString.add("\tdb   #fe");
@@ -277,37 +302,46 @@ public class FileManager {
 		arrayListString.add("\torg  #d000 ");
 		arrayListString.add("INICIO: ");
 		/*********************Estableciendo modo vídeo*******************************/
-		arrayListString.add("; Setup video mode");
-		if(screen==2) {
-			arrayListString.add("\tld a,2");
-		}else if(screen==5) {
-			arrayListString.add("\tld a,5");
-		}
-		arrayListString.add("\tcall #005F ; CHGMOD equ #005F, change mode video to screen 2 or 5 or ...");
+		arrayListString.add("; Setup video mode");		
+		arrayListString.add("\tld a,"+screen+"");
+		arrayListString.add("\tcall #005F ; CHGMOD equ #005F, change mode video to screen "+screen+"");
 		/*********************Estableciendo modo tamaño sprites*******************************/
 		arrayListString.add("; Setup sprite size");
-		if(spriteVideo!=0) {
+		if (spriteType==8 && audmented==false){
+			arrayListString.add(";sprites no ampliados de 8x8");
+			arrayListString.add("\tld b,#e0");
+			arrayListString.add("\tld c,1");
+		}if (spriteType==8 && audmented==true){
+			arrayListString.add(";sprites ampliados de 8x8");
+			arrayListString.add("\tld b,#e0");
+			arrayListString.add("\tld c,1");
+		}else if(spriteType==16 && audmented==false) {
 			arrayListString.add("; Sprites no ampliados de 16x16");
 			arrayListString.add("\tld b,#e2");
 			arrayListString.add("\tld c,1");
-			arrayListString.add("\tcall #0047;WRTVDP equ #0047, escribe en los registros del VDP");
-		}else {
-			arrayListString.add(";sprites no ampliados de 8x8");
+			arrayListString.add("\tcall #0047;WRTVDP equ #0047, b data to write, c number register, escribe en los registros del VDP");
+		}else if(spriteType==16 && audmented==true) {
+			arrayListString.add("; Sprites ampliados de 16x16");
+			arrayListString.add("\tld b,#e3");
+			arrayListString.add("\tld c,1");
+			arrayListString.add("\tcall #0047;WRTVDP equ #0047, b data to write, c number register, escribe en los registros del VDP");
+
 		}
 		
-
 		/*********************DEFINICICIONES*******************************/
 		arrayListString.add("\tld hl, sprites_definition");
-		if(screen==2) {
-			arrayListString.add("\tld de, 14336 ;&h3800, base(14) en sc2");
-		}else if(screen==5) {
-			arrayListString.add("\tld de, 30720 ;&h7800, base(29) en sc5");
-		}	
-		arrayListString.add("\tld bc, 32*"+arrayListSprites.size());
-		arrayListString.add("\tcall  #005C; #005C=LDIRVM ");
+			if(screen==1 || screen==2 || screen==3)
+				arrayListString.add("\tld de, 14336 ;&h3800, base(14) en sc2");
+			if(screen==4 || screen==5)
+				arrayListString.add("\tld de, 30720 ;&h7800, base(29) en sc5");
+			 if(spriteType==8)
+				 arrayListString.add("\tld bc, 8*"+arrayListSprites.size());
+			 if(spriteType==16 ) 
+				 arrayListString.add("\tld bc, 32*"+arrayListSprites.size());
+			 arrayListString.add("\tcall  #005C; #005C=LDIRVM ");
 		/******************END DEFINICICIONES*******************************/
 		/**************************COLORS*******************************/
-		if(screen==5) {
+		if(screen==4 || screen==5) {
 			arrayListString.add("\tld hl, sprites_colors");
 			arrayListString.add("\tld de, 29696 ;&h7400, en sc5");
 			arrayListString.add("\tld bc, 16*"+arrayListSprites.size());
@@ -316,10 +350,10 @@ public class FileManager {
 		/***********************END COLORS*******************************/
 		/**************************ATRIBUTES*******************************/
 		arrayListString.add("\tld hl, sprites_atributes");
-		if(screen==2) {	
-			arrayListString.add("\tld de, 6912 ;&h1b00, base(28) en sc5");
+		if(screen==1 || screen==2 || screen==3) {	
+			arrayListString.add("\tld de, 6912 ;&h1b00, base(13) en sc2");
 			arrayListString.add("\tld bc, 4*"+arrayListSprites.size());
-		}else if(screen==5) {
+		}else if(screen==4 || screen==5) {
 			arrayListString.add("\tld de, 30208 ;&h7600, base(28) en sc5");
 			arrayListString.add("\tld bc, 4*"+arrayListSprites.size());
 		}
@@ -328,7 +362,6 @@ public class FileManager {
 		
 		arrayListString.add(".bucle: ");
 		arrayListString.add("\tjr .bucle");
-		
 		arrayListString.add("sprites_definition:");
 		for (Sprite sprite: arrayListSprites) {
 			arrayListString.add(";Definition sprite "+sprite.getNumber()+", name: "+sprite.getName());
@@ -339,10 +372,10 @@ public class FileManager {
 			}	
 		}
 		
-		arrayListString.add("sprites_colors: ");
+		if(screen==4 || screen==5)arrayListString.add("sprites_colors: ");
 		for (Sprite sprite: arrayListSprites) {
-			arrayListString.add(";Data colors sprite "+sprite.getNumber()+", name: "+sprite.getName());
-			if(screen==5) {
+			if(screen==4 || screen==5) {
+				arrayListString.add(";Data colors sprite "+sprite.getNumber()+", name: "+sprite.getName());
 				String dataColors=sprite.getDataColors();
 				String[] stringsColors=dataColors.split("\n");
 				for(String linea: stringsColors) {
@@ -352,18 +385,36 @@ public class FileManager {
 			
 		}
 		arrayListString.add("sprites_atributes: ");
+		int file=0;
+		int column=0;
 		for (Sprite sprite: arrayListSprites) {
 			arrayListString.add(";Data atributes sprite (y,x,patron,color) "+sprite.getNumber()+", name: "+sprite.getName());
-			if(screen==2) {
+			
+			if(screen==1 || screen==2 || screen==3) {
+				if(column>33*4) {
+					column=0;
+					file+=33;
+				}
+				Color[] colors=sprite.getColorButtons0();
+				Color color=colors[0];
+				int positionColor=PaletteManager.getPositionColorOnPalette(color);
 				//y,x,number,color
-				arrayListString.add("\tdb "+192/2+","+sprite.getNumber()*20+","+sprite.getNumber()*4+",2");
-			}else if(screen==5) {
+				if(sprite.getType()==8)
+					arrayListString.add("\tdb "+file+","+column+","+sprite.getNumber()+","+positionColor);
+				else if(sprite.getType()==16)
+					arrayListString.add("\tdb "+file+","+column+","+sprite.getNumber()*4+","+positionColor);
+			}else if(screen==4 || screen==5) {
+				if(column>33*7) {
+					column=0;
+					file+=33;
+				}
 				String dataColors=sprite.getDataColors();
 				String[] stringsColors=dataColors.split("\n");
 				for(String linea: stringsColors) {
-					arrayListString.add("\tdb "+192/2+","+sprite.getNumber()*20+","+sprite.getNumber()*4+", \" \"");
+					arrayListString.add("\tdb "+file+","+column+","+sprite.getNumber()*4+", \" \"");
 				}
 			}
+			column+=33;
 		}
 
 		arrayListString.add("FINAL: ");
@@ -373,19 +424,6 @@ public class FileManager {
 		ArrayList<String> arrayListStringAutoexec=new ArrayList<String>();
 		arrayListStringAutoexec.add("10 bload\"sprites.bin\",r");
 		fileManager.writeFile(new File("autoexec.bas"), arrayListStringAutoexec);
-		//Creamos el .bin
-		String cmdOpenSjasm = "tools\\sjasm\\sjasm.exe sprites.asm"; 
-		try {
-			Runtime.getRuntime().exec(cmdOpenSjasm);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println(e);
-		} 
-		//Copiamos el autoexec y el bin a la carpeta dsk de openMSX
-		
-		
-		JOptionPane.showMessageDialog(null, "Created binary File");
 	}
 	
 }

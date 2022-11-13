@@ -15,6 +15,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -22,16 +23,25 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import es.tipolisto.MSXTools.beans.Sprite;
+import es.tipolisto.MSXTools.gui.NewSpriteEditorWindow;
 import es.tipolisto.MSXTools.gui.PaneDrawableSpriteEditor;
 import es.tipolisto.MSXTools.gui.RiboonSpriteEditor;
+import es.tipolisto.MSXTools.gui.SpriteEditorWindow;
 import es.tipolisto.MSXTools.utils.FileManager;
-import es.tipolisto.MSXTools.utils.StringManager;
+
 
 
 /**
  * 
  * Esta clase representa el menú superior para guardar archivos serializados y leerlos
  * Necesitará la lista de sprites, el riboon y el canvas
+ */
+
+/**
+ * 1 habilita el 1 y 2 item del menu 
+ * 2 habilita la variable de clase SpriteEditorWindow son 4 pasos
+ * 3 comenta En la linea 89, 90
+ * 3 comenta En la linea 442 y 443 para deshabilitar el dispose y el visible(false)
  */
 public class MainMenuSpriteEditor extends JMenuBar{
 	private ArrayList<Sprite> arrayListSprites;
@@ -40,9 +50,10 @@ public class MainMenuSpriteEditor extends JMenuBar{
 	private JCheckBox checkBoxAutoSaved;
 	private JLabel lblSpriteNumber;
 	private JTextField jtFieldName;
-	private JComboBox comboBoxScreenInEditor,comboBoxTypeSpriteInEditor;
-	private JMenu mnMenuExportSC2,mnMenuExportSC5;
-
+	private JMenu mnMenuExportSC1,mnMenuExportSC2,mnMenuExportSC3,mnMenuExportSC4,mnMenuExportSC5;
+	private byte spriteNumColorsOrScreenMode;
+	private boolean spriteAudmented;
+	private SpriteEditorWindow spriteEditorWindow;
 	//int countSprites;
 	public MainMenuSpriteEditor(ArrayList<Sprite> arrayListSprites,
 			PaneDrawableSpriteEditor canvas,
@@ -50,18 +61,38 @@ public class MainMenuSpriteEditor extends JMenuBar{
 			JCheckBox checkBoxAutoSaved,
 			JLabel lblSpriteNumber,
 			JTextField jtFieldName,
-			JComboBox comboBoxScreenInEditor,JComboBox comboBoxTypeSpriteInEditor) {
+			byte spriteNumColorsOrScreenMode,
+			SpriteEditorWindow spriteEditorWindow) {
+		/**
+		 * ,
+			SpriteEditorWindow spriteEditorWindow
+		 */
 		this.arrayListSprites=arrayListSprites;
 		this.canvas=canvas;
 		this.riboon=riboon;
 		this.checkBoxAutoSaved=checkBoxAutoSaved;
 		this.lblSpriteNumber=lblSpriteNumber;
 		this.jtFieldName=jtFieldName;
-		this.comboBoxScreenInEditor=comboBoxScreenInEditor;
-		this.comboBoxTypeSpriteInEditor=comboBoxTypeSpriteInEditor;
-		/****************Menu File********************************/
+		this.spriteAudmented=false;
+		this.spriteEditorWindow=spriteEditorWindow;
+		/**********************************Menu File****************************************/
 		JMenu mnNewMenuFile = new JMenu("File");
 	    add(mnNewMenuFile);
+	    
+	    JMenuItem mntmNewMenuItemNewSprite = new JMenuItem("New");
+	    mnNewMenuFile.add(mntmNewMenuItemNewSprite);
+	    mntmNewMenuItemNewSprite.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(arrayListSprites.size()>0) {
+					JOptionPane.showMessageDialog(null, "Close open sprites");
+				}else {
+					NewSpriteEditorWindow frame = new NewSpriteEditorWindow();
+					frame.setVisible(true);
+					spriteEditorWindow.setVisible(false);
+					spriteEditorWindow.dispose();
+				}
+			}
+		});
 	    
 	    JMenuItem mntmNewMenuItemOpenSprites = new JMenuItem("Open");
 	    mnNewMenuFile.add(mntmNewMenuItemOpenSprites);
@@ -74,7 +105,7 @@ public class MainMenuSpriteEditor extends JMenuBar{
 				}
 			}
 		});
-	    JMenuItem mntmNewMenuItemNewSprites = new JMenuItem("New / Close");
+	    JMenuItem mntmNewMenuItemNewSprites = new JMenuItem("Close");
 	    mnNewMenuFile.add(mntmNewMenuItemNewSprites);
 	    mntmNewMenuItemNewSprites.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -97,56 +128,177 @@ public class MainMenuSpriteEditor extends JMenuBar{
 				System.exit(0);			
 			}
 		});
-	    /**************End Menu File********************************/
+	    /********************************End Menu File**********************************************/
 	    
 	    
-	    /**************Menu Export********************************/
+	    /***************************************Menu Export*****************************************/
 	    JMenu mnMenuExport = new JMenu("Export");
 		add(mnMenuExport);
 		
+		
+		/**********mnMenuExportSC1**********************************************/
+		mnMenuExportSC1 = new JMenu("SC1");
+		mnMenuExport.add(mnMenuExportSC1);
+	
+		//SC1->bas
+		JMenuItem mntmNewMenuItemSC1 = new JMenuItem("Export to bas");
+		mnMenuExportSC1.add(mntmNewMenuItemSC1);
+		mntmNewMenuItemSC1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(arrayListSprites.size()<=0) {
+					JOptionPane.showMessageDialog(null, "There are no sprites");
+				}else {
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					//(byte screen, byte spriteType, ArrayList<Sprite>arrayListSprites, boolean audmented, boolean showMessahe)
+					FileManager.createdSpritesFileBasicDecimal((byte)1,(byte)spriteType, arrayListSprites,spriteAudmented ,true);	
+				}				
+			}
+		});
+		//SC1->bin
+		JMenuItem mnMenuExportToBinSC1 = new JMenuItem("Export to bin");
+		mnMenuExportSC1.add(mnMenuExportToBinSC1);
+		mnMenuExportToBinSC1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(arrayListSprites.size()<=0) {
+					JOptionPane.showMessageDialog(null, "There are no sprites");
+				}else {
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					FileManager.createdSpritesFileBinaryDecimal((byte)1,(byte)spriteType, arrayListSprites,spriteAudmented);	
+					createBinary();
+				}
+			}
+		});
+		/**********End mnMenuExportSC1**********************************************/
+		/**********mnMenuExportSC2**************************************************/
 		mnMenuExportSC2 = new JMenu("SC2");
 		mnMenuExport.add(mnMenuExportSC2);
-		JMenuItem mntmNewMenuItem = new JMenuItem("Export to bas");
-		mnMenuExportSC2.add(mntmNewMenuItem);
-		mntmNewMenuItem.addActionListener(new ActionListener() {
+	
+		//SC2->bas
+		JMenuItem mntmNewMenuItemToBasSC2 = new JMenuItem("Export to bas");
+		mnMenuExportSC2.add(mntmNewMenuItemToBasSC2);
+		mntmNewMenuItemToBasSC2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(arrayListSprites.size()<=0) {
 					JOptionPane.showMessageDialog(null, "There are no sprites");
 				}else {
-					FileManager.createdSpritesFileBasicDecimal((byte)2,(byte)2, arrayListSprites, true);	
-				}
-								
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					//(byte screen, byte spriteType, ArrayList<Sprite>arrayListSprites, boolean audmented, boolean showMessahe)
+					FileManager.createdSpritesFileBasicDecimal((byte)2,(byte)spriteType, arrayListSprites,spriteAudmented ,true);	
+				}				
 			}
 		});
-		
-		JMenuItem mnMenuExportToBin = new JMenuItem("Export to bin");
-		mnMenuExportSC2.add(mnMenuExportToBin);
-		mnMenuExportToBin.addActionListener(new ActionListener() {
+		//SC2->bin
+		JMenuItem mnMenuExportToBinSC2 = new JMenuItem("Export to bin");
+		mnMenuExportSC2.add(mnMenuExportToBinSC2);
+		mnMenuExportToBinSC2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(arrayListSprites.size()<=0) {
 					JOptionPane.showMessageDialog(null, "There are no sprites");
 				}else {
-					FileManager.createdSpritesFileBinaryDecimal((byte)2,(byte)2, arrayListSprites);	
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					FileManager.createdSpritesFileBinaryDecimal((byte)2,(byte)spriteType, arrayListSprites,spriteAudmented);	
+					createBinary();
 				}
 			}
 		});
+		/**********End mnMenuExportSC2**********************************************/
+		/**********mnMenuExportSC3**************************************************/
+		mnMenuExportSC3 = new JMenu("SC3");
+		mnMenuExport.add(mnMenuExportSC3);
+	
+		//SC3->bas
+		JMenuItem mntmNewMenuItemToBasSC3 = new JMenuItem("Export to bas");
+		mnMenuExportSC3.add(mntmNewMenuItemToBasSC3);
+		mntmNewMenuItemToBasSC3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(arrayListSprites.size()<=0) {
+					JOptionPane.showMessageDialog(null, "There are no sprites");
+				}else {
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					//(byte screen, byte spriteType, ArrayList<Sprite>arrayListSprites, boolean audmented, boolean showMessahe)
+					FileManager.createdSpritesFileBasicDecimal((byte)3,(byte)spriteType, arrayListSprites,spriteAudmented ,true);	
+				}				
+			}
+		});
+
+		//SC3->bin
+		JMenuItem mnMenuExportToBinSC3 = new JMenuItem("Export to bin");
+		mnMenuExportSC3.add(mnMenuExportToBinSC3);
+		mnMenuExportToBinSC3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(arrayListSprites.size()<=0) {
+					JOptionPane.showMessageDialog(null, "There are no sprites");
+				}else {
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					FileManager.createdSpritesFileBinaryDecimal((byte)3,(byte)spriteType, arrayListSprites,spriteAudmented);	
+					createBinary();
+				}
+			}
+		});
+
+		/**********End mnMenuExportSC3**********************************************/
+		/**********mnMenuExportSC4**************************************************/
+		mnMenuExportSC4 = new JMenu("SC4");
+		mnMenuExport.add(mnMenuExportSC4);
+	
+		//SC4->bas
+		JMenuItem mntmNewMenuItemToBasSC4 = new JMenuItem("Export to bas");
+		mnMenuExportSC4.add(mntmNewMenuItemToBasSC4);
+		mntmNewMenuItemToBasSC4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(arrayListSprites.size()<=0) {
+					JOptionPane.showMessageDialog(null, "There are no sprites");
+				}else {
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					//(byte screen, byte spriteType, ArrayList<Sprite>arrayListSprites, boolean audmented, boolean showMessahe)
+					FileManager.createdSpritesFileBasicDecimal((byte)4,(byte)spriteType, arrayListSprites,spriteAudmented ,true);	
+				}				
+			}
+		});
+		//SC4->bin
+		JMenuItem mnMenuExportToBinSC4 = new JMenuItem("Export to bin");
+		mnMenuExportSC4.add(mnMenuExportToBinSC4);
+		mnMenuExportToBinSC4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(arrayListSprites.size()<=0) {
+					JOptionPane.showMessageDialog(null, "There are no sprites");
+				}else {
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					FileManager.createdSpritesFileBinaryDecimal((byte)4,(byte)spriteType, arrayListSprites,spriteAudmented);	
+					createBinary();
+				}
+			}
+		});
+		/**********End mnMenuExportSC3**********************************************/
 		
-		
+		/**********mnMenuExportSC5**********************************************/
 		mnMenuExportSC5 = new JMenu("SC5");
 		mnMenuExport.add(mnMenuExportSC5);
+		
+		//SC5->bas
 		JMenuItem mntmNewMenuSC5ExportToBas = new JMenuItem("Export to bas");
 		mnMenuExportSC5.add(mntmNewMenuSC5ExportToBas);
 		mntmNewMenuSC5ExportToBas.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(arrayListSprites.size()<=0) {
-					JOptionPane.showMessageDialog(null, "There are no sprites");
+			   		JOptionPane.showMessageDialog(null, "There are no sprites");
 				}else {
 					//Le tenemos que especificar el screen y el tamaño de los sprites que son 1 para 8x8px o 2 para 16x16px
-					FileManager.createdSpritesFileBasicDecimal((byte)5,(byte)2, arrayListSprites, true);	
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					FileManager.createdSpritesFileBasicDecimal((byte)5,(byte)spriteType, arrayListSprites, spriteAudmented,true);	
 				}
 			}
 		});
-
+		//SC5->bin
 		JMenuItem mntMenuSC5ExportToBin = new JMenuItem("Export to bin");
 		mnMenuExportSC5.add(mntMenuSC5ExportToBin);
 		mntMenuSC5ExportToBin.addActionListener(new ActionListener() {
@@ -154,11 +306,14 @@ public class MainMenuSpriteEditor extends JMenuBar{
 				if(arrayListSprites.size()<=0) {
 					JOptionPane.showMessageDialog(null, "There are no sprites");
 				}else {
-					FileManager.createdSpritesFileBinaryDecimal((byte)5,(byte)2, arrayListSprites);		
+					Sprite sprite0=arrayListSprites.get(0);
+					byte spriteType=sprite0.getType();
+					FileManager.createdSpritesFileBinaryDecimal((byte)5,(byte)spriteType, arrayListSprites,spriteAudmented);		
+					createBinary();
 				}
 			}
 		});
-	    /**************End Menu Export********************************/
+		/**********End mnMenuExportSC5**********************************************/
 		
 		
 	    
@@ -173,26 +328,45 @@ public class MainMenuSpriteEditor extends JMenuBar{
 				if(arrayListSprites.size()<=0) {
 						JOptionPane.showMessageDialog(null, "There are no sprites");
 				}else {
+					//Vemos el sistema operativo
+					String sSistemaOperativo = System.getProperty("os.name");
+					System.out.println(sSistemaOperativo);
+
 					try {
 						File fileSpriteBAS=new File("sprites.bas");
 						if(fileSpriteBAS.exists()) {
-							String[] argsBas = { "CMD", "/C", "COPY", "/Y", "sprites.bas", "tools\\openmsx\\dsk" };
-							Runtime.getRuntime().exec(argsBas);
-							String[] argsAutoexec = { "CMD", "/C", "COPY", "/Y", "autoexec.bas", "tools\\openmsx\\dsk" };
-							Runtime.getRuntime().exec(argsAutoexec);
+							//Si es windows
+							if(sSistemaOperativo.indexOf("Win")>=0) {
+								String[] argsBas = { "CMD", "/C", "COPY", "/Y", "sprites.bas", "tools\\openmsx\\dsk" };
+								String[] argsAutoexec = { "CMD", "/C", "COPY", "/Y", "autoexec.bas", "tools\\openmsx\\dsk" };
+								Runtime.getRuntime().exec(argsBas);
+								Runtime.getRuntime().exec(argsAutoexec);
+								//Si es linux o MAC
+							}else if( (sSistemaOperativo.indexOf("mac") >= 0) || sSistemaOperativo.indexOf("nix") >= 0 || sSistemaOperativo.indexOf("nux") >= 0 || sSistemaOperativo.indexOf("aix") > 0 ) {
+								String[] argsBas = { "/bin/sh", "-c", "cp", "-f", "sprites.bas", "./tools/openmsx/dsk" };
+								String[] argsAutoexec = { "/bin/sh", "-c", "cp", "-f", "autoexec.bas", "./tools/openmsx/dsk" };
+								Runtime.getRuntime().exec(argsBas);
+								Runtime.getRuntime().exec(argsAutoexec);
+							}
+							
 						}
 						File fileSpriteBin=new File("sprites.bin");
 						if(fileSpriteBin.exists()) {
-							String[] argsBin = { "CMD", "/C", "COPY", "/Y", "sprites.bin", "tools\\openmsx\\dsk" };
-							Runtime.getRuntime().exec(argsBin);
-							String[] argsAutoexec = { "CMD", "/C", "COPY", "/Y", "autoexec.bas", "tools\\openmsx\\dsk" };
-							Runtime.getRuntime().exec(argsAutoexec);
+							if(sSistemaOperativo.indexOf("Win")>=0) {
+								String[] argsBin = { "CMD", "/C", "COPY", "/Y", "sprites.bin", "tools\\openmsx\\dsk" };	
+								String[] argsAutoexec = { "CMD", "/C", "COPY", "/Y", "autoexec.bas", "tools\\openmsx\\dsk" };
+								Runtime.getRuntime().exec(argsBin);
+								Runtime.getRuntime().exec(argsAutoexec);
+							}else if( (sSistemaOperativo.indexOf("mac") >= 0) || sSistemaOperativo.indexOf("nix") >= 0 || sSistemaOperativo.indexOf("nux") >= 0 || sSistemaOperativo.indexOf("aix") > 0 ) {
+								String[] argsBin = { "/bin/sh", "-c", "cp", "-f", "sprites.bin", "./tools/openmsx/dsk" };	
+								String[] argsAutoexec = { "/bin/sh", "-c", "cp", "-f", "autoexec.bas", "./tools/openmsx/dsk" };
+								Runtime.getRuntime().exec(argsBin);
+								Runtime.getRuntime().exec(argsAutoexec);
+							}
 						}
-	
 						String cmdOpenMSX = "tools\\openmsx\\openmsx.exe -machine Philips_NMS_8255 -diska tools\\openmsx\\dsk"; //Comando de apagado en linux
 						//String cmdOpenMSX = "tools\\openmsx\\openmsx.exe -script tools\\openMSX\\emul_start_config.txt"; //Comando de apagado en linux
 						Runtime.getRuntime().exec(cmdOpenMSX); 
-						
 					} catch (IOException ioe) {
 						System.out.println (ioe);
 						 JOptionPane.showMessageDialog(null, ""+ioe);
@@ -205,14 +379,24 @@ public class MainMenuSpriteEditor extends JMenuBar{
 	
 	
 	
-	
+	public JMenu getJMenuExportSC1() {
+		return this.mnMenuExportSC1;
+	}
 	public JMenu getJMenuExportSC2() {
 		return this.mnMenuExportSC2;
+	}
+	public JMenu getJMenuExportSC3() {
+		return this.mnMenuExportSC3;
+	}
+	public JMenu getJMenuExportSC4() {
+		return this.mnMenuExportSC4;
 	}
 	public JMenu getJMenuExportSC5() {
 		return this.mnMenuExportSC5;
 	}
-	
+	public void setSpriteAudmented(boolean audmented) {
+		this.spriteAudmented=audmented;
+	}
 	
 	
 	
@@ -227,34 +411,49 @@ public class MainMenuSpriteEditor extends JMenuBar{
 	private void openFile() {
 		File fileOrigin=null;
 		JFileChooser jFileChooser=new JFileChooser(System.getProperty("user.dir"));
-		jFileChooser.setDialogTitle("Selecciona un archivo");
+		jFileChooser.setDialogTitle("Selected one file");
 		int result=jFileChooser.showSaveDialog(null);
 		if(result==JFileChooser.APPROVE_OPTION) {
 			//JOptionPane.showConfirmDialog(null, "WIP");
 			String content="";
 			String contentCompress="";
 			fileOrigin=jFileChooser.getSelectedFile();
-			
-			
 			try {
-				arrayListSprites.clear();
 				ObjectInputStream objectInputputStream=new ObjectInputStream(new FileInputStream(fileOrigin));
-				Sprite[] sprites=(Sprite[]) objectInputputStream.readObject();
-				
+				Sprite[] sprites=(Sprite[]) objectInputputStream.readObject();	
 				if(sprites!=null) {
 					Sprite sprite0=sprites[0];
-					//comboBoxTypeSpriteInEditor tiene el la posici�n 1 la palabra SC0 y en la posici�n 1 tiene SC1, etc		
-					if(sprite0.getNumColors()==2)comboBoxScreenInEditor.setSelectedIndex(2);
-					else if(sprite0.getNumColors()==5)comboBoxScreenInEditor.setSelectedIndex(5);
-					//comboBoxTypeSpriteInEditor tiene en la posici�n 0 8x8 pixeles, 1 para 16x16, etc
-					if(sprite0.getType()==8)comboBoxTypeSpriteInEditor.setSelectedIndex(0);
-					else if(sprite0.getType()==16)comboBoxTypeSpriteInEditor.setSelectedIndex(1);
-					
-				}
-				for (int i=0;i<sprites.length;i++) {
-					Sprite sprite=sprites[i];
-					arrayListSprites.add(sprite);
-					riboon.updateRiboon(sprite);
+					SpriteEditorWindow frame = new SpriteEditorWindow(sprite0.getType(),spriteNumColorsOrScreenMode);
+					frame.setVisible(true);
+				
+					switch (sprite0.getNumColors()) {
+						case 1:
+							frame.setSpriteNumColorsOrScreenMode((byte)1);
+							frame.checkStateForScreenChange((byte)1);
+							break;
+						case 2:
+							frame.setSpriteNumColorsOrScreenMode((byte)2);
+							frame.checkStateForScreenChange((byte)2);
+							break;
+						case 3:
+							frame.setSpriteNumColorsOrScreenMode((byte)3);
+							frame.checkStateForScreenChange((byte)3);
+							break;
+						case 4:
+							frame.setSpriteNumColorsOrScreenMode((byte)4);
+							frame.checkStateForScreenChange((byte)4);
+							break;
+						case 5:
+							frame.setSpriteNumColorsOrScreenMode((byte)5);
+							frame.checkStateForScreenChange((byte)5);
+							break;
+					}
+					frame.setSpriteType(sprite0.getType());
+					frame.setArrayListSprites(sprites);
+					frame.showOrHideColorsTextAreaAndLabel(false);
+		
+					spriteEditorWindow.setVisible(false);
+					spriteEditorWindow.dispose();
 				}
 				objectInputputStream.close();
 			}catch(Exception ex) {
@@ -323,6 +522,27 @@ public class MainMenuSpriteEditor extends JMenuBar{
 		lblSpriteNumber.setText("");
 		jtFieldName.setText("");
 	}
-	
-	
+
+	private void createBinary() {
+		String sSistemaOperativo = System.getProperty("os.name");
+		System.out.println(sSistemaOperativo);
+		try {
+			String cmdOpenSjasm ="";
+			if(sSistemaOperativo.indexOf("Win")>=0) {
+				 cmdOpenSjasm = "tools\\sjasm\\sjasm.exe sprites.asm"; 
+			}else if( (sSistemaOperativo.indexOf("mac") >= 0) || sSistemaOperativo.indexOf("nix") >= 0 || sSistemaOperativo.indexOf("nux") >= 0 || sSistemaOperativo.indexOf("aix") > 0 ) {
+				cmdOpenSjasm = "./tools/sjasm/sjasm sprites.asm"; 
+			}else {
+				System.out.println("No found system operation.");
+			}
+			Runtime.getRuntime().exec(cmdOpenSjasm);
+		
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println(e);
+		} 
+		JOptionPane.showMessageDialog(null, "Created binary File");
+	}
 }

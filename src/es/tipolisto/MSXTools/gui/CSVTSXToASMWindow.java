@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -45,6 +46,7 @@ public class CSVTSXToASMWindow extends JFrame {
 		contentPane.setLayout(null);
 		//Centramos la ventana en la pantalla
 		setLocationRelativeTo(null);
+		setIconImage(new ImageIcon("data\\icon.png").getImage());
 		
 		JLabel lblNewLabel = new JLabel("CSV / TMX to ASM");
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 17));

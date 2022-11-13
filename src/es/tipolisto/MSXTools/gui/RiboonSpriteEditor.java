@@ -83,7 +83,7 @@ public class RiboonSpriteEditor extends JPanel{
 		//1.Obtenemos los pixeles
 		Pixel[][] pixels = sprite.getPixels();
 		//Necesitamos crear un befferedImage para poder trabajar con pixeles
-		BufferedImage bufferedImageDestiny = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
+		BufferedImage bufferedImageDestiny = new BufferedImage(sprite.getType(), sprite.getType(), BufferedImage.TYPE_INT_RGB);
 		int colorSRGB = 0;
 		for (int y = 0; y < pixels.length; y++) {
 			for (int x = 0; x < pixels[0].length; x++) {

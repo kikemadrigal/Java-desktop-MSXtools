@@ -40,6 +40,7 @@ import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 
 public class CompressWindow extends JFrame implements ActionListener, DocumentListener{
 
@@ -76,7 +77,7 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 		setTitle("Compress / descompress");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		
+		setIconImage(new ImageIcon("data\\icon.png").getImage());
 		
 		componentsInizialice();
 		

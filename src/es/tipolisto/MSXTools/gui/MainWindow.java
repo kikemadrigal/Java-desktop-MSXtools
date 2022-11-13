@@ -1,18 +1,24 @@
 package es.tipolisto.MSXTools.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
+import java.awt.Graphics;
+
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 
@@ -49,7 +55,8 @@ public class MainWindow extends JFrame {
 		setResizable(false);
 		//Centramos la ventana en la pantalla
 		setLocationRelativeTo(null);
-		
+		setIconImage(new ImageIcon("data\\icon.png").getImage());
+
 		JLabel lblNewLabel = new JLabel("MSXTools");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel.setBounds(316, 23, 166, 38);
@@ -147,6 +154,7 @@ public class MainWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				//Le decimos que empieza con sprites de 16x16 y screen 5
 				SpriteEditorWindow frame = new SpriteEditorWindow((byte)16,(byte)5);
+				//NewSpriteEditorWindow frame = new NewSpriteEditorWindow();
 				frame.setVisible(true);				
 			}
 		});
