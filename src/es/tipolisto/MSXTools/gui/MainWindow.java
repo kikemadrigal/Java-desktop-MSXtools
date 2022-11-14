@@ -1,24 +1,22 @@
 package es.tipolisto.MSXTools.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
+
+import es.tipolisto.MSXTools.gui.pixelEditor.SpriteEditorWindow;
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
-import java.awt.Graphics;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 
@@ -182,7 +180,8 @@ public class MainWindow extends JFrame {
 		JButton btnPaletteEditor = new JButton("Palette editor");
 		btnPaletteEditor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "WIP");
+				PaletteManagerWindow frame = new PaletteManagerWindow();
+				frame.setVisible(true);
 			}
 		});
 		btnPaletteEditor.setBounds(282, 208, 231, 23);

@@ -1,23 +1,15 @@
 package es.tipolisto.MSXTools.gui;
 
-import java.awt.AlphaComposite;
-import java.awt.BorderLayout;
+
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Composite;
-import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Insets;
+
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -28,7 +20,6 @@ import javax.swing.event.DocumentListener;
 import es.tipolisto.MSXTools.beans.RGB;
 import es.tipolisto.MSXTools.utils.IMG2SC;
 import es.tipolisto.MSXTools.utils.MSXPalette;
-import es.tipolisto.MSXTools.utils.NumberManager;
 import es.tipolisto.MSXTools.utils.PaletteManager;
 
 import javax.swing.ImageIcon;
@@ -39,12 +30,8 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.awt.event.ActionEvent;
@@ -60,31 +47,26 @@ public class IMG2SCWindow extends JFrame {
 	private File fileOrigin;
 	private BufferedImage bufferedImageOrigin;
 	private IMG2SC img2sc;
-	private JButton jButtonColor0,jButtonColor1,jButtonColor2,jButtonColor3,jButtonColor4,jButtonColor5;
-	private JButton jButtonColor6,jButtonColor7,jButtonColor8,jButtonColor9,jButtonColor10;
-	private JButton jButtonColor11,jButtonColor12,jButtonColor13,jButtonColor14,jButtonColor15;
-	private JButton[] jButtons;
-	private JTextField textFieldColorRed;
-	private JTextField textFieldColorGreen;
-	private JTextField textFieldColorBlue;
-	private JLabel lalbelHexageximalColor;
+
+
+
+
 	private JCheckBox checkBoxDetectAutomaticColors;
-	private JLabel labelMsxColor;
-	private JLabel labelSelectedPathFile;
+
 	
-	private int paletteSelect;
-	private HashMap<MSXPalette, RGB> palettePhilips8255NMS;
+
+	
 	private JLabel jLabelImage;
 	private JLabel labelFileOrigin;
 	private JLabel labelImageDestiny;
+	private JLabel labelSelectedPathFile;
 	private int valueProgressBar;
 	private JLabel jLabelProgressBar;
 	private static JProgressBar progressBar;
 	private int similarDistance;
 	private JButton buttonReset;
 	private JButton btnSeleccionarArchivoPng;
-	private JComboBox comboBoxPalettes;
-	private JLabel lblNewLabel_5;
+
 	
 	private int screen;
 	
@@ -94,8 +76,8 @@ public class IMG2SCWindow extends JFrame {
 	public IMG2SCWindow() {
 		img2sc=new IMG2SC();
 		screen=5;
-		palettePhilips8255NMS=PaletteManager.getPalettePhilips8255NMS();
-		paletteSelect=0;
+		
+		
 		similarDistance=10000;
 		
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -138,14 +120,14 @@ public class IMG2SCWindow extends JFrame {
 		
 		
 		progressBar = new JProgressBar(0,100);
-		progressBar.setBounds(10, 218, 580, 28);
+		progressBar.setBounds(10, 395, 580, 28);
 		contentPane.add(progressBar);
 		progressBar.setBackground(Color.green);
 		progressBar.setVisible(false);
 	
 		
 		jLabelProgressBar = new JLabel("");
-		jLabelProgressBar.setBounds(10, 226, 572, 20);
+		jLabelProgressBar.setBounds(18, 238, 572, 20);
 		contentPane.add(jLabelProgressBar);
 		
 
@@ -189,7 +171,7 @@ public class IMG2SCWindow extends JFrame {
 				}
 			}
 		});
-		buttonConvertBMP2SC5.setBounds(10, 126, 580, 35);
+		buttonConvertBMP2SC5.setBounds(10, 226, 580, 35);
 		buttonConvertBMP2SC5.setVisible(false);
 		contentPane.add(buttonConvertBMP2SC5);
 		
@@ -227,7 +209,7 @@ public class IMG2SCWindow extends JFrame {
 				}
 			}
 		});
-		buttonConvertPNG2SC5.setBounds(10, 126, 580, 35);
+		buttonConvertPNG2SC5.setBounds(10, 166, 580, 35);
 		buttonConvertPNG2SC5.setVisible(false);
 		contentPane.add(buttonConvertPNG2SC5);
 		
@@ -287,18 +269,9 @@ public class IMG2SCWindow extends JFrame {
 		lblNewLabel_4.setBounds(10, 97, 113, 14);
 		contentPane.add(lblNewLabel_4);
 		
-		lblNewLabel_5 = new JLabel("Select palette");
-		lblNewLabel_5.setBounds(10, 269, 91, 14);
-		contentPane.add(lblNewLabel_5);
+
 		
-		comboBoxPalettes = new JComboBox();
-		comboBoxPalettes.setBounds(123, 265, 467, 22);
-		comboBoxPalettes.addItem("Philips 8255 NMS");
-		comboBoxPalettes.addItem("TMS9918 1");
-		comboBoxPalettes.addItem("TMS9219 2");
-		comboBoxPalettes.addItem("TOSHIBA");
-		comboBoxPalettes.addItem("V9938");
-		contentPane.add(comboBoxPalettes);
+
 		
 
 		
@@ -356,9 +329,7 @@ public class IMG2SCWindow extends JFrame {
 		buttonReset.setBounds(941, 528, 83, 51);
 		contentPane.add(buttonReset);
 		
-		JButton buttonCreateNewPaltte = new JButton("Create new Palette");
-		buttonCreateNewPaltte.setBounds(10, 294, 580, 23);
-		contentPane.add(buttonCreateNewPaltte);
+		
 		
 		JButton buttonConvertBMP2SC2 = new JButton("Convert BMP 2 SC2");
 		buttonConvertBMP2SC2.addActionListener(new ActionListener() {
@@ -366,12 +337,12 @@ public class IMG2SCWindow extends JFrame {
 				
 			}
 		});
-		buttonConvertBMP2SC2.setBounds(10, 172, 580, 35);
+		buttonConvertBMP2SC2.setBounds(10, 336, 580, 35);
 		buttonConvertBMP2SC2.setVisible(false);
 		contentPane.add(buttonConvertBMP2SC2);
 		
 		JButton buttonConvertPNG2SC2 = new JButton("Convert PGN 2 SC2");
-		buttonConvertPNG2SC2.setBounds(10, 172, 580, 35);
+		buttonConvertPNG2SC2.setBounds(10, 279, 580, 35);
 		buttonConvertPNG2SC2.setVisible(false);
 		contentPane.add(buttonConvertPNG2SC2);
 		
@@ -409,92 +380,9 @@ public class IMG2SCWindow extends JFrame {
 		contentPane.add(comboBoxScreen);
 		
 		
-		textFieldColorRed = new JTextField();
-		textFieldColorRed.setHorizontalAlignment(SwingConstants.CENTER);
-		textFieldColorRed.setText("0");
-		textFieldColorRed.setBounds(33, 445, 167, 20);
-		contentPane.add(textFieldColorRed);
-		textFieldColorRed.setColumns(10);
-		textFieldColorRed.getDocument().addDocumentListener(new DocumentListener() {
-			  	  public void changedUpdate(DocumentEvent e) {
-				  	 
-				  }
-				  public void removeUpdate(DocumentEvent e) {
-					 
-				  }
-				  public void insertUpdate(DocumentEvent e) {
-					  if(!textFieldColorRed.getText().toString().isEmpty()) {
-						  String rgbComponent="red";
-						  changeRGBOnPalette(rgbComponent);
-					  }	  
-				  }
-		});
+		
+		
 
-		textFieldColorGreen = new JTextField();
-		textFieldColorGreen.setHorizontalAlignment(SwingConstants.CENTER);
-		textFieldColorGreen.setText("0");
-		textFieldColorGreen.setColumns(10);
-		textFieldColorGreen.setBounds(210, 445, 197, 20);
-		contentPane.add(textFieldColorGreen);
-		textFieldColorGreen.getDocument().addDocumentListener(new DocumentListener() {
-		  	  public void changedUpdate(DocumentEvent e) {
-				  	 
-			  }
-			  public void removeUpdate(DocumentEvent e) {
-				 
-			  }
-			  public void insertUpdate(DocumentEvent e) {
-				  if(!textFieldColorGreen.getText().toString().isEmpty()) {
-					  String rgbComponent="green";
-					  changeRGBOnPalette(rgbComponent);
-				  }	
-			  }
-		});
-
-		
-		textFieldColorBlue = new JTextField();
-		textFieldColorBlue.setHorizontalAlignment(SwingConstants.CENTER);
-		textFieldColorBlue.setText("0");
-		textFieldColorBlue.setColumns(10);
-		textFieldColorBlue.setBounds(417, 445, 173, 20);
-		contentPane.add(textFieldColorBlue);
-		textFieldColorBlue.getDocument().addDocumentListener(new DocumentListener() {
-		  	  public void changedUpdate(DocumentEvent e) {
-				  	 
-			  }
-			  public void removeUpdate(DocumentEvent e) {
-				 
-			  }
-			  public void insertUpdate(DocumentEvent e) {
-				  if(!textFieldColorBlue.getText().toString().isEmpty()) {
-					  String rgbComponent="blue";
-					  changeRGBOnPalette(rgbComponent);
-				  }	 
-			  }
-		});
-		
-		JLabel lblNewLabel = new JLabel("R");
-		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
-		lblNewLabel.setBounds(110, 411, 26, 23);
-		contentPane.add(lblNewLabel);
-		
-		JLabel lblG = new JLabel("G");
-		lblG.setFont(new Font("Tahoma", Font.BOLD, 16));
-		lblG.setBounds(299, 411, 26, 23);
-		contentPane.add(lblG);
-		
-		JLabel lblB = new JLabel("B");
-		lblB.setFont(new Font("Tahoma", Font.BOLD, 16));
-		lblB.setBounds(492, 411, 26, 23);
-		contentPane.add(lblB);
-		
-		lalbelHexageximalColor = new JLabel("00ffffff");
-		lalbelHexageximalColor.setBounds(279, 489, 46, 14);
-		contentPane.add(lalbelHexageximalColor);
-		
-		labelMsxColor = new JLabel("1,0,0,0");
-		labelMsxColor.setBounds(279, 514, 46, 14);
-		contentPane.add(labelMsxColor);
 		
 		checkBoxDetectAutomaticColors = new JCheckBox("Trabajar con colores indexados");
 		checkBoxDetectAutomaticColors.setBounds(6, 547, 234, 23);
@@ -510,468 +398,19 @@ public class IMG2SCWindow extends JFrame {
 		lblNewLabel_2.setBounds(628, 269, 396, 14);
 		contentPane.add(lblNewLabel_2);
 		
-
-		
-		initializeColorButtons();
-
-	}
-
-		
-	/*
-	private void aumentarProgressBar() {
-		progressBar.setValue(50);
-		
-	}*/
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	private void initializeColorButtons() {
-		contentPane.setLayout(null);
-		jButtonColor0 = new JButton("0");
-		RGB rgbTransparent=palettePhilips8255NMS.get(MSXPalette.TRANSPARENTE);
-		Color colorButtonTransparent=new Color(rgbTransparent.getRed(),rgbTransparent.getGreen(),rgbTransparent.getBlue());
-		jButtonColor0.setBackground(colorButtonTransparent);
-		jButtonColor0.setForeground(Color.WHITE);
-		jButtonColor0.setOpaque(true);
-		//jButtonColor0.setBorderPainted(false);
-		jButtonColor0.setBounds(10, 343, 69, 23);
-		contentPane.add(jButtonColor0);
-		jButtonColor0.addActionListener(new ActionListener() {
+		JButton btnConfigurePalette = new JButton("Configure palette");
+		btnConfigurePalette.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				paletteSelect=0;
-				setTextFieldColors(rgbTransparent,0);
-
+				PaletteManagerWindow frame = new PaletteManagerWindow();
+				frame.setVisible(true);
 			}
 		});
-		
-		
-		jButtonColor1 = new JButton("1");
-		RGB rgbNegro=palettePhilips8255NMS.get(MSXPalette.TRANSPARENTE);
-		Color colorNegro=new Color(rgbNegro.getRed(),rgbNegro.getGreen(),rgbNegro.getBlue());
-		jButtonColor1.setBackground(colorNegro);
-		jButtonColor1.setForeground(new Color(255, 255, 255));
-		jButtonColor1.setOpaque(true);
-		//jButtonColor1.setBorderPainted(false);
-		jButtonColor1.setBounds(87, 343, 60, 23);
-		contentPane.add(jButtonColor1);
-		jButtonColor1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=1;
-				setTextFieldColors(rgbNegro, 1);
-
-			}
-		});
-		
-		
-		jButtonColor2 = new JButton("2");
-		jButtonColor2.setForeground(new Color(255, 255, 255));
-		RGB rgbVerdeMedio=palettePhilips8255NMS.get(MSXPalette.VERDE_MEDIO);
-		Color colorVerdeMedio=new Color(rgbVerdeMedio.getRed(),rgbVerdeMedio.getGreen(),rgbVerdeMedio.getBlue());
-		jButtonColor2.setBackground(colorVerdeMedio);
-		jButtonColor2.setOpaque(true);
-		//jButtonColor2.setBorderPainted(false);
-		jButtonColor2.setBounds(161, 343, 60, 23);
-		contentPane.add(jButtonColor2);
-		jButtonColor2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=2;
-				setTextFieldColors(rgbVerdeMedio,2);
-
-			}
-		});
+		btnConfigurePalette.setBounds(10, 457, 580, 35);
+		contentPane.add(btnConfigurePalette);
 		
 
-		jButtonColor3 = new JButton("3");
-		RGB rgbVerdeClaro=palettePhilips8255NMS.get(MSXPalette.VERDE_CLARO);
-		Color colorVerdeClaro=new Color(rgbVerdeClaro.getRed(),rgbVerdeClaro.getGreen(),rgbVerdeClaro.getBlue());
-		jButtonColor3.setBackground(colorVerdeClaro);
-		jButtonColor3.setOpaque(true);
-		//jButtonColor3.setBorderPainted(false);
-		jButtonColor3.setBounds(229, 343, 62, 23);
-		contentPane.add(jButtonColor3);
-		jButtonColor3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=3;
-				setTextFieldColors(rgbVerdeClaro,3);
-
-			}
-		});
-		
-		jButtonColor4 = new JButton("4");
-		jButtonColor4.setForeground(new Color(255, 255, 255));
-		RGB rgbAzulOscuro=palettePhilips8255NMS.get(MSXPalette.AZUL_OSCURO);
-		Color colorAzulOscuro=new Color(rgbAzulOscuro.getRed(),rgbAzulOscuro.getGreen(),rgbAzulOscuro.getBlue());
-		jButtonColor4.setBackground(colorAzulOscuro);
-		jButtonColor4.setOpaque(true);
-		//jButtonColor4.setBorderPainted(false);
-		jButtonColor4.setBounds(299, 343, 71, 23);
-		contentPane.add(jButtonColor4);
-		jButtonColor4.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=4;
-				setTextFieldColors(rgbAzulOscuro,4);
-
-			}
-		});
-		
-		jButtonColor5 = new JButton("5");
-		RGB rgbAzulMedio=palettePhilips8255NMS.get(MSXPalette.AZUL_MEDIO);
-		Color colorAzulMedio=new Color(rgbAzulMedio.getRed(),rgbAzulMedio.getGreen(),rgbAzulMedio.getBlue());
-		jButtonColor5.setBackground(colorAzulMedio);
-		jButtonColor5.setForeground(new Color(255, 255, 255));
-		jButtonColor5.setOpaque(true);
-		//jButtonColor5.setBorderPainted(false);
-		jButtonColor5.setBounds(382, 343, 62, 23);
-		contentPane.add(jButtonColor5);
-		jButtonColor5.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=5;
-				setTextFieldColors(rgbAzulMedio,5);
-
-			}
-		});
-		
-		jButtonColor6 = new JButton("6");
-		jButtonColor6.setForeground(new Color(255, 255, 255));
-		RGB rgbRojoOscuro=palettePhilips8255NMS.get(MSXPalette.ROJO_OSCURO);
-		Color colorRojoOscuro=new Color(rgbRojoOscuro.getRed(),rgbRojoOscuro.getGreen(),rgbRojoOscuro.getBlue());
-		jButtonColor6.setBackground(colorRojoOscuro);
-		jButtonColor6.setOpaque(true);
-		//jButtonColor6.setBorderPainted(false);
-		jButtonColor6.setBounds(454, 343, 64, 23);
-		contentPane.add(jButtonColor6);
-		jButtonColor6.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=6;
-				setTextFieldColors(rgbRojoOscuro,6);
-
-			}
-		});
-		
-		jButtonColor7 = new JButton("7");
-		RGB rgbAzulClaro=palettePhilips8255NMS.get(MSXPalette.AZUL_CLARO);
-		Color colorAzulClaro=new Color(rgbAzulClaro.getRed(),rgbAzulClaro.getGreen(),rgbAzulClaro.getBlue());
-		jButtonColor7.setBackground(colorAzulClaro);
-		jButtonColor7.setOpaque(true);
-		jButtonColor7.setForeground(new Color(0, 0, 0));
-		//jButtonColor7.setBorderPainted(false);
-		jButtonColor7.setBounds(528, 343, 62, 23);
-		contentPane.add(jButtonColor7);
-		jButtonColor7.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=7;
-				setTextFieldColors(rgbAzulClaro,7);
-
-			}
-		});
-		
-		jButtonColor8 = new JButton("6");
-		RGB rgbRojoMedio=palettePhilips8255NMS.get(MSXPalette.ROJO_MEDIO);
-		Color colorRojoMedio=new Color(rgbRojoMedio.getRed(),rgbRojoMedio.getGreen(),rgbRojoMedio.getBlue());
-		jButtonColor8.setBackground(colorRojoMedio);
-		jButtonColor8.setOpaque(true);
-		jButtonColor8.setForeground(Color.WHITE);
-		//jButtonColor8.setBorderPainted(false);
-		jButtonColor8.setBounds(8, 377, 71, 23);
-		contentPane.add(jButtonColor8);
-		jButtonColor8.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=8;
-				setTextFieldColors(rgbRojoMedio,8);
-
-			}
-		});
-		
-		jButtonColor9 = new JButton("9");
-		RGB rgbRojoClaro=palettePhilips8255NMS.get(MSXPalette.ROJO_CLARO);
-		Color colorRojoClaro=new Color(rgbRojoClaro.getRed(),rgbRojoClaro.getGreen(),rgbRojoClaro.getBlue());
-		jButtonColor9.setBackground(colorRojoClaro);
-		jButtonColor9.setOpaque(true);
-		jButtonColor9.setForeground(new Color(0, 0, 0));
-		//jButtonColor9.setBorderPainted(false);
-		jButtonColor9.setBounds(89, 377, 58, 23);
-		contentPane.add(jButtonColor9);
-		jButtonColor9.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=9;
-				setTextFieldColors(rgbRojoClaro,9);
-	
-			}
-		});
-		
-		jButtonColor10 = new JButton("10");
-		RGB rgbAmarilloOscuro=palettePhilips8255NMS.get(MSXPalette.AMARILLO_OSCURO);
-		Color colorAmarilloOscuro=new Color(rgbAmarilloOscuro.getRed(),rgbAmarilloOscuro.getGreen(),rgbAmarilloOscuro.getBlue());
-		jButtonColor10.setBackground(colorAmarilloOscuro);
-		jButtonColor10.setOpaque(true);
-		jButtonColor10.setForeground(new Color(0, 0, 0));
-		//jButtonColor10.setBorderPainted(false);
-		jButtonColor10.setBounds(159, 377, 62, 23);
-		contentPane.add(jButtonColor10);
-		jButtonColor10.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=10;
-				setTextFieldColors(rgbAmarilloOscuro,10);
-
-			}
-		});
-		
-		jButtonColor11 = new JButton("11");
-		RGB rgbAmarilloClaro=palettePhilips8255NMS.get(MSXPalette.AMARILLO_CLARO);
-		Color colorAmarilloClaro=new Color(rgbAmarilloClaro.getRed(),rgbAmarilloClaro.getGreen(),rgbAmarilloClaro.getBlue());
-		jButtonColor11.setBackground(colorAmarilloClaro);
-		jButtonColor11.setOpaque(true);
-		jButtonColor11.setForeground(new Color(0, 0, 0));
-		//jButtonColor11.setBorderPainted(false);
-		jButtonColor11.setBounds(229, 377, 62, 23);
-		contentPane.add(jButtonColor11);
-		jButtonColor11.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=11;
-				setTextFieldColors(rgbAmarilloClaro,11);
-
-			}
-		});
-		
-		jButtonColor12 = new JButton("12");
-		RGB rgbVerdeOscuro=palettePhilips8255NMS.get(MSXPalette.VERDE_OSCURO);
-		Color colorVerdeOscuro=new Color(rgbVerdeOscuro.getRed(),rgbVerdeOscuro.getGreen(),rgbVerdeOscuro.getBlue());
-		jButtonColor12.setBackground(colorVerdeOscuro);
-		jButtonColor12.setOpaque(true);
-		jButtonColor12.setForeground(new Color(0, 0, 0));
-		//jButtonColor12.setBorderPainted(false);
-		jButtonColor12.setBounds(299, 377, 71, 23);
-		contentPane.add(jButtonColor12);
-		jButtonColor12.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=12;
-				setTextFieldColors(rgbVerdeOscuro,12);
-
-			}
-		});
-		
-		jButtonColor13 = new JButton("13");
-		RGB rgbVioleta=palettePhilips8255NMS.get(MSXPalette.VIOLETA);
-		Color colorVioleta=new Color(rgbVioleta.getRed(),rgbVioleta.getGreen(),rgbVioleta.getBlue());
-		jButtonColor13.setBackground(colorVioleta);
-		jButtonColor13.setOpaque(true);
-		jButtonColor13.setForeground(Color.WHITE);
-		//jButtonColor13.setBorderPainted(false);
-		jButtonColor13.setBounds(382, 377, 62, 23);
-		contentPane.add(jButtonColor13);
-		jButtonColor13.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=13;
-				setTextFieldColors(rgbVioleta,13);
-
-			}
-		});
-		
-		jButtonColor14 = new JButton("14");
-		RGB rgbGris=palettePhilips8255NMS.get(MSXPalette.GRIS);
-		Color colorGris=new Color(rgbGris.getRed(),rgbGris.getGreen(),rgbGris.getBlue());
-		jButtonColor14.setBackground(colorGris);
-		jButtonColor14.setOpaque(true);
-		jButtonColor14.setForeground(Color.WHITE);
-		//jButtonColor14.setBorderPainted(false);
-		jButtonColor14.setBounds(454, 377, 63, 23);
-		contentPane.add(jButtonColor14);
-		jButtonColor14.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=14;
-				setTextFieldColors(rgbGris,14);
-
-			}
-		});
-		
-		jButtonColor15 = new JButton("15");
-		RGB rgbBlanco=palettePhilips8255NMS.get(MSXPalette.BLANCO);
-		Color colorBlanco=new Color(rgbBlanco.getRed(),rgbBlanco.getGreen(),rgbBlanco.getBlue());
-		jButtonColor15.setBackground(colorBlanco);
-		jButtonColor15.setOpaque(true);
-		jButtonColor15.setForeground(new Color(0, 0, 0));
-		//jButtonColor15.setBorderPainted(false);
-		jButtonColor15.setBounds(528, 378, 62, 23);
-		contentPane.add(jButtonColor15);
-		jButtonColor15.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				paletteSelect=15;
-				setTextFieldColors(rgbBlanco,15);
-
-			}
-		});
-		
-		jButtons=new JButton[16];
-		jButtons[0]=jButtonColor0;
-		jButtons[1]=jButtonColor1;
-		jButtons[2]=jButtonColor2;
-		jButtons[3]=jButtonColor3;
-		jButtons[4]=jButtonColor4;
-		jButtons[5]=jButtonColor5;
-		jButtons[6]=jButtonColor6;
-		jButtons[7]=jButtonColor7;
-		jButtons[8]=jButtonColor8;
-		jButtons[9]=jButtonColor9;
-		jButtons[10]=jButtonColor10;
-		jButtons[11]=jButtonColor11;
-		jButtons[12]=jButtonColor12;
-		jButtons[13]=jButtonColor13;
-		jButtons[14]=jButtonColor14;
-		jButtons[15]=jButtonColor15;
-		
-		JButton jButtonResetColors = new JButton("Reset colors");
-		jButtonResetColors.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				resetPalette();
-			}
-		});
-		jButtonResetColors.setBounds(448, 542, 142, 23);
-		contentPane.add(jButtonResetColors);
 		
 		
 
-
-		
-		
-		
-		
-
-	}
-	
-	private void setTextFieldColors(RGB rgb, int selection) {
-		for(int i=0;i<jButtons.length;i++) {
-			JButton jbutton=jButtons[i];
-			if(i==selection)jbutton.setBorder(new LineBorder(Color.BLACK));
-			else jbutton.setBorder(new LineBorder(Color.WHITE));
-		}
-		textFieldColorRed.setText(String.valueOf(rgb.getRed()));
-		textFieldColorGreen.setText(String.valueOf(rgb.getGreen()));
-		textFieldColorBlue.setText(String.valueOf(rgb.getBlue()));
-		
-		//color hexagesimal
-		Color color=new Color(rgb.getRed(),rgb.getGreen(),rgb.getBlue());
-		String hexagesimal=Integer.toHexString( color.getRGB() & 0x00ffffff );
-		lalbelHexageximalColor.setText(hexagesimal);
-
-		//Color MSX
-		int MSXColorRed=(rgb.getRed()*7)/255;
-		int MSXColorGreen=(rgb.getGreen()*7)/255;
-		int MSXColorBlue=(rgb.getBlue()*7)/255;
-		labelMsxColor.setText(selection+","+MSXColorRed+","+MSXColorGreen+","+MSXColorBlue);
-		
-	}
-	
-	private void changeRGBOnPalette(String rgbComponent) {
-		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
-			if(paletteSelect==entry.getKey().ordinal()) {
-				if (rgbComponent.equals("red")) entry.getValue().setRed(Integer.valueOf(textFieldColorRed.getText()));
-				if (rgbComponent.equals("green")) entry.getValue().setGreen(Integer.valueOf(textFieldColorGreen.getText()));
-				if (rgbComponent.equals("blue")) entry.getValue().setBlue(Integer.valueOf(textFieldColorBlue.getText()));
-				jButtons[paletteSelect].setBackground(new Color(entry.getValue().getRed(),entry.getValue().getGreen(),entry.getValue().getBlue()));
-			}
-		}
-		
-	}
-	
-	private void resetPalette() {
-		RGB[] rgbRGB8255NMS=PaletteManager.getRGB8255NMS();
-		int i=0;
-		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
-			switch(entry.getKey()) {
-			case TRANSPARENTE:
-				entry.getValue().setRed(rgbRGB8255NMS[0].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[0].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[0].getBlue());
-				break;
-			case NEGRO:
-				entry.getValue().setRed(rgbRGB8255NMS[1].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[1].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[1].getBlue());
-				break;
-			case VERDE_MEDIO:
-				entry.getValue().setRed(rgbRGB8255NMS[2].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[2].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[2].getBlue());
-				break;
-			case VERDE_CLARO:
-				entry.getValue().setRed(rgbRGB8255NMS[3].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[3].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[3].getBlue());
-				break;
-			case AZUL_OSCURO:
-				entry.getValue().setRed(rgbRGB8255NMS[4].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[4].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[4].getBlue());
-				break;
-			case AZUL_MEDIO:
-				entry.getValue().setRed(rgbRGB8255NMS[5].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[5].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[5].getBlue());
-				break;
-			case ROJO_OSCURO:
-				entry.getValue().setRed(rgbRGB8255NMS[6].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[6].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[6].getBlue());
-				break;
-			case AZUL_CLARO:
-				entry.getValue().setRed(rgbRGB8255NMS[7].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[7].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[7].getBlue());
-				break;
-			case ROJO_MEDIO:
-				entry.getValue().setRed(rgbRGB8255NMS[8].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[8].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[8].getBlue());
-				break;
-			case ROJO_CLARO:
-				entry.getValue().setRed(rgbRGB8255NMS[9].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[9].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[9].getBlue());
-				break;
-			case AMARILLO_OSCURO:
-				entry.getValue().setRed(rgbRGB8255NMS[10].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[10].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[10].getBlue());
-				break;
-			case AMARILLO_CLARO:
-				entry.getValue().setRed(rgbRGB8255NMS[11].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[11].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[11].getBlue());
-				break;
-			case VERDE_OSCURO:
-				entry.getValue().setRed(rgbRGB8255NMS[12].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[12].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[12].getBlue());
-				break;
-			case VIOLETA:
-				entry.getValue().setRed(rgbRGB8255NMS[13].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[13].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[13].getBlue());
-				break;
-			case GRIS:
-				entry.getValue().setRed(rgbRGB8255NMS[14].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[14].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[14].getBlue());
-				break;
-			case BLANCO:
-				entry.getValue().setRed(rgbRGB8255NMS[15].getRed());
-				entry.getValue().setGreen(rgbRGB8255NMS[15].getGreen());
-				entry.getValue().setBlue(rgbRGB8255NMS[15].getBlue());
-				break;
-			}		
-			i++;
-		}
-		JOptionPane.showMessageDialog(null, "Restored colors");
-		for (Entry<MSXPalette, RGB> entry : palettePhilips8255NMS.entrySet()) {
-			jButtons[entry.getKey().ordinal()].setBackground(new Color(entry.getValue().getRed(),entry.getValue().getGreen(),entry.getValue().getBlue()));
-		}
 	}
 }
