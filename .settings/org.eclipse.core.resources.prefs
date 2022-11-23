@@ -1,6 +1,3 @@
 eclipse.preferences.version=1
-encoding//src/es/tipolisto/MSXTools/beans/Sprite.java=UTF-8
-encoding//src/es/tipolisto/MSXTools/gui/pixelEditor/MainMenuSpriteEditor.java=UTF-8
-encoding//src/es/tipolisto/MSXTools/gui/pixelEditor/PaneDrawableSpriteEditor.java=UTF-8
-encoding//src/es/tipolisto/MSXTools/gui/pixelEditor/SpriteEditorWindow.java=UTF-8
-encoding//src/es/tipolisto/MSXTools/utils/IMG2SC.java=UTF-8
+encoding//src/main/java=UTF-8
+encoding/<project>=UTF-8

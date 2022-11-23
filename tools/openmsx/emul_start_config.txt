@@ -1,6 +1,0 @@
-machine Philips_NMS_8255 
-#plug joyporta mouse 
-set throttle off
-after realtime 1 "set throttle on"
-diska dsk/ 
-
