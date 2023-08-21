@@ -105,7 +105,7 @@ public class MainWindow extends JFrame {
 		lblNewLabel_1.setBounds(660, 332, 131, 14);
 		contentPane.add(lblNewLabel_1);
 		
-		JButton jButtonLetterCounter = new JButton("Letter counter");
+		JButton jButtonLetterCounter = new JButton("Counter");
 		jButtonLetterCounter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				LetterCounterWindow frame = new LetterCounterWindow();

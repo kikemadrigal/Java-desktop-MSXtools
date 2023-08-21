@@ -38,11 +38,13 @@ import java.util.regex.Pattern;
 
 import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
 
-public class CompressWindow extends JFrame implements ActionListener, DocumentListener{
+public class CompressWindow extends JFrame implements DocumentListener{
 
 	//protected static final boolean String = false;
 	private JPanel contentPane;
@@ -52,16 +54,17 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 	private JLabel jLabelFileSave;
 	private JLabel jLabelNumberButesCompress;
 	private JLabel jLabelNumberButesDecompress;
+	private JLabel jLabelFileToRead;
 	private JTextArea jTextAreaDecompress;
 	private JTextArea jTextAreaCompress;
-	private JToggleButton toogleButtonCompress;
 	private JButton jButtonSsave;
 	private JButton jButtonLoadFileHex;
-
+	
 	
 	private FileManager fileManager;
 	private CompressManager compressManager;
-
+	private File fileOrigin;
+	private ArrayList<String> arrayList;
 
 	public CompressWindow() {
 		fileManager=new FileManager();
@@ -79,6 +82,7 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setIconImage(new ImageIcon("data\\icon.png").getImage());
 		
+		arrayList=new ArrayList<String>();
 		componentsInizialice();
 		
 		
@@ -87,7 +91,7 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 	private void componentsInizialice() {
 		JLabel jlaberlTitle = new JLabel("Compress / decompress");
 		jlaberlTitle.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		jlaberlTitle.setBounds(185, 25, 201, 32);
+		jlaberlTitle.setBounds(185, 11, 201, 32);
 		contentPane.add(jlaberlTitle);
 		
 		jLabelCompress = new JLabel("Decompress");
@@ -108,35 +112,34 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 		contentPane.add(jLabelNumberButesDecompress);
 		
 		
+
 		jTextAreaCompress = new JTextArea();
-		jTextAreaCompress.setBounds(10, 233, 586, 194);
-		//jTextAreaCompress.setLineWrap(true);
-		contentPane.add(jTextAreaCompress);
-		//JScrollPane
-		JScrollPane jscrollPaneCompress = new JScrollPane(jTextAreaCompress);
-		jscrollPaneCompress.setBounds(10, 233, 586, 194);
-		contentPane.add(jscrollPaneCompress);
+		//jTextAreaCompress.setBounds(10, 232, 586, 194);
 		jTextAreaCompress.getDocument().addDocumentListener(this);
-		
-		jTextAreaDecompress = new JTextArea();
-		jTextAreaDecompress.setBounds(10, 473, 586, 194);
-		//jTextAreaDescompress.setLineWrap(true);
-		contentPane.add(jTextAreaDecompress);
-		JScrollPane jscrollPaneDescompress = new JScrollPane(jTextAreaDecompress);
-		jscrollPaneDescompress.setBounds(10, 473, 586, 194);
-		contentPane.add(jscrollPaneDescompress);
+		JScrollPane jScrollPaneTextAreaCompress=new JScrollPane(jTextAreaCompress);
+		jScrollPaneTextAreaCompress.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		jScrollPaneTextAreaCompress.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		jScrollPaneTextAreaCompress.setBounds(10, 232, 586, 194);
+		//jTextAreaCompress.setLineWrap(true);
+		//contentPane.add(jTextAreaCompress);
+		contentPane.add(jScrollPaneTextAreaCompress);
 
 		
-		toogleButtonCompress = new JToggleButton("Mode compress");
-		toogleButtonCompress.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		toogleButtonCompress.setBounds(437, 11, 144, 49);
-		contentPane.add(toogleButtonCompress);
-		toogleButtonCompress.addActionListener(this);
+		
+		jTextAreaDecompress = new JTextArea();
+		//jTextAreaDecompress.setBounds(10, 473, 586, 194);
+		//jTextAreaDescompress.setLineWrap(true);
+		JScrollPane jScrollPaneTextAreaDecompress=new JScrollPane(jTextAreaDecompress);
+		jScrollPaneTextAreaDecompress.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		jScrollPaneTextAreaDecompress.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		jScrollPaneTextAreaDecompress.setBounds(10, 473, 586, 194);
+		//contentPane.add(jTextAreaDecompress);
+		contentPane.add(jScrollPaneTextAreaDecompress);
 		
 		jButtonSsave = new JButton("Save");
 		jButtonSsave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ArrayList<String> arrayList=new ArrayList<String>();
+				arrayList.clear();
 				//Comprobamos que el campo a comprimir tenga datos
 				String text=jTextAreaCompress.getText();
 				if (!text.equals("") || text==null) {
@@ -145,12 +148,12 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 					jFileChooser.setDialogTitle("Selecciona un archivo");
 					int result=jFileChooser.showSaveDialog(null);
 					if(result==JFileChooser.APPROVE_OPTION) {
-						File fileOrigin=jFileChooser.getSelectedFile();
+						fileOrigin=jFileChooser.getSelectedFile();
 						String fileDestinyPathParent=fileOrigin.getParent();
 						String fileDestinyName=fileOrigin.getName().substring(0,fileOrigin.getName().length())+"-rle16.txt";
 						String fileDestinyAbsolutePathParent=fileDestinyPathParent+"\\"+fileDestinyName;
 						File fileDestiny=new File(fileDestinyAbsolutePathParent);
-						//2.Obtenemos todos las líneas
+						//2.Obtenemos todos las lï¿½neas
 						//String text=jTextAreaCompress.getText();
 						String[] lines=text.split("\n");
 						//String contentCompress="";
@@ -169,50 +172,30 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 				
 			}
 		});
-		jButtonSsave.setBounds(10, 132, 165, 32);
+		jButtonSsave.setBounds(10, 126, 109, 32);
 		contentPane.add(jButtonSsave);
+		
+		
+		jLabelFileToRead = new JLabel("");
+		jLabelFileToRead.setVerticalAlignment(SwingConstants.TOP);
+		jLabelFileToRead.setBounds(10, 97, 571, 25);
+		contentPane.add(jLabelFileToRead);
+		
 		
 		jButtonLoadFileHex = new JButton("Load file Hex");
 		jButtonLoadFileHex.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ArrayList<String> arrayList=new ArrayList<String>();
+				arrayList.clear();
 				JFileChooser jFileChooser=new JFileChooser(System.getProperty("user.dir"));
 				jFileChooser.setDialogTitle("Selecciona un archivo");
 				int result=jFileChooser.showSaveDialog(null);
 				if(result==JFileChooser.APPROVE_OPTION) {
-					//JOptionPane.showConfirmDialog(null, "WIP");
-					String content="";
-					String contentCompress="";
-					File fileOrigin=jFileChooser.getSelectedFile();
-					String fileName=fileOrigin.getName();
-					String extension=fileName.substring(fileName.length()-8, fileName.length());
-					if (!extension.equals("-hex.txt")) {
-						JOptionPane.showMessageDialog(null,"You have to go to the main menu and click on CSV/TSX to Hex");
-						System.out.println(extension);
-					}else {
-						try {
-							arrayList=fileManager.readFileFromCompressWindow(fileOrigin);
-							for (String string:arrayList) {
-								content+=string;
-								//System.out.println(string);
-								String temp=compressManager.compressManagerLine2Digits(string);
-								contentCompress+=temp;
-							}
-							jTextAreaCompress.setText(content);
-							jTextAreaDecompress.setText(contentCompress);
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-					}
-					
-
-					
-					
+					fileOrigin=jFileChooser.getSelectedFile();
+					readFile();		
 				}
 			}
 		});
-		jButtonLoadFileHex.setBounds(10, 73, 165, 32);
+		jButtonLoadFileHex.setBounds(10, 54, 183, 32);
 		contentPane.add(jButtonLoadFileHex);
 		
 		jLabelFileSelected = new JLabel("");
@@ -220,9 +203,20 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 		contentPane.add(jLabelFileSelected);
 		
 		jLabelFileSave = new JLabel("");
-		jLabelFileSave.setBounds(10, 175, 571, 14);
+		jLabelFileSave.setBounds(125, 126, 471, 32);
 		contentPane.add(jLabelFileSave);
 		
+		JButton jButtonReLoadFileHex = new JButton("Reload");
+		jButtonReLoadFileHex.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				arrayList.clear();
+				readFile();
+			}
+		});
+		jButtonReLoadFileHex.setBounds(217, 54, 154, 32);
+		contentPane.add(jButtonReLoadFileHex);
+		
+
 
 		
 		/*JButton btnNewButton = new JButton("New button");
@@ -235,24 +229,7 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 	}
 
 	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(toogleButtonCompress==e.getSource()) {
-			//JOptionPane.showMessageDialog(null, "clickado!!!");
-			if (toogleButtonCompress.isSelected()) {
-				toogleButtonCompress.setText("Mode descompress");
-				jLabelCompress.setText("Test to descompress:");
-				jLabelDecompress.setText("Compress:");
 
-			}else {
-				toogleButtonCompress.setText("Mode compress");
-				jLabelCompress.setText("Test to compress:");
-				jLabelDecompress.setText("Descompress:");
-			}
-			jTextAreaCompress.setText("");
-			jTextAreaDecompress.setText("");
-		}
-	}
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
@@ -298,5 +275,39 @@ public class CompressWindow extends JFrame implements ActionListener, DocumentLi
 		}
 		public void actionPerformed(ActionEvent e) {
 		}
+	}
+	
+	
+	private void readFile() {
+		if(fileOrigin!=null) {
+			String content="";
+			String contentCompress="";
+			String fileName=fileOrigin.getName();
+			String extension=fileName.substring(fileName.length()-8, fileName.length());
+			if (!extension.equals("-hex.txt")) {
+				JOptionPane.showMessageDialog(null,"The file name must end in \"-hext.txt\" which is a file generated by MSXTools");
+				System.out.println(extension);
+			}else {
+				try {
+					arrayList=fileManager.readFileFromCompressWindow(fileOrigin);
+					for (String string:arrayList) {
+						content+=string;
+						//System.out.println(string);
+						String temp=compressManager.compressManagerLine2Digits(string);
+						contentCompress+=temp;
+					}
+					jTextAreaCompress.setText(content);
+					jTextAreaDecompress.setText(contentCompress);
+					jLabelFileToRead.setText(fileOrigin.getAbsolutePath());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}		
+		}else {
+			JOptionPane.showMessageDialog(null,"Selected one file");		
+		}
+		
+		
 	}
 }

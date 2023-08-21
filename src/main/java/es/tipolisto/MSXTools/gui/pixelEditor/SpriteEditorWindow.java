@@ -134,7 +134,7 @@ public class SpriteEditorWindow extends JFrame  {
 				
 		menuBar = new MainMenuSpriteEditor(arrayListSprites, canvas, riboon, chckbxAutoSaved, 
 				lblSpriteNumberOnCanvas,jtFieldName,spriteNumColorsOrScreenMode,this);
-		//menuBar=null;
+		menuBar=null;
 		canvas.setMainMenuSpriteEditor(menuBar);
 		setJMenuBar(menuBar);
 		
